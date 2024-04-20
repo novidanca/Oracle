@@ -1,0 +1,46 @@
+﻿@using Oracle.Core.DatabaseManagement
+
+@inject IDbPathService DbPathService
+@inject NavigationManager NavManager
+
+@page "/"
+
+
+<h1>Hi there</h1>
+<p>You need to set a database file before you continue</p>
+
+
+<div @onclick="Load">Load Campaign</div>
+<div @onclick="MakeNewCampaign">Make a New Campaign</div>
+
+@code
+{
+	protected override async Task OnInitializedAsync()
+	{
+		var dbPath = DbPathService.GetPath();
+		var dbUpdated = await DbPathService.SetPath(dbPath);
+
+		if (dbUpdated)
+			NavManager.NavigateTo("home");
+
+	}
+
+	private async Task Load()
+	{
+		var newPath = await DbPathService.GetPathFromUser();
+		var pathUpdated = await DbPathService.SetPath(newPath);
+
+		if (pathUpdated)
+			NavManager.NavigateTo("home");
+	}
+
+	private async Task MakeNewCampaign()
+	{
+		var newPath = await DbPathService.MakePath("NewCampaign", false);
+		var pathUpdated = await DbPathService.SetPath(newPath);
+
+		if (pathUpdated)
+			NavManager.NavigateTo("home");
+	}
+
+}

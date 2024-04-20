@@ -1,0 +1,62 @@
+﻿@page "/home"
+@using Oracle.Data.Models
+@using Oracle.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject OracleDbContext OracleDb
+
+<h1>Characters</h1>
+@foreach (var character in Characters)
+{
+	<div class="card">
+		<div>@character.Id</div>
+		<div>@character.Name</div>
+	</div>
+	
+}
+<hr/>
+
+<div class="btn btn-primary" @onclick="NewChar">NewChar</div>
+
+<h1>Activity Types</h1>
+@foreach (var type in ActivityTypes)
+{
+	<div class="card">
+		<div>@type.Id</div>
+		<div>@type.Name</div>
+		<div>@type.ProjectContributionType?.Name</div>
+		<div>@type.ProjectContributionAmount</div>
+	</div>
+
+}
+
+@code
+{
+	private List<Character> Characters { get; set; } = new();
+	private List<ActivityType> ActivityTypes { get; set; } = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Refresh();
+	}
+	
+	private async Task Refresh()
+	{
+		Characters = await OracleDb.Characters.ToListAsync();
+		ActivityTypes = await OracleDb.ActivityTypes.Include(x => x.ProjectContributionType).ToListAsync();
+	}
+	
+	private async Task NewChar()
+	{
+		var character = new Character()
+		{
+			Name = "Hi there"
+		};
+	
+		OracleDb.Characters.Add(character);
+	
+		await OracleDb.SaveChangesAsync();
+		await Refresh();
+	}
+
+}
