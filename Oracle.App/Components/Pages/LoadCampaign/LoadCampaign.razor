@@ -1,0 +1,54 @@
+﻿@using Oracle.Core.DatabaseManagement
+@using Oracle.App.Components.Layout
+
+@inject IDbPathService DbPathService
+@inject NavigationManager NavManager
+
+@page "/"
+@page "/{OpenNew:bool}"
+
+
+<h1>Hi there</h1>
+<p>You need to set a database file before you continue</p>
+
+<MudButton Variant="Variant.Outlined" OnClick="Load">Load Campaign</MudButton>
+<MudButton Variant="Variant.Filled" OnClick="MakeNewCampaign">Make a new campaign</MudButton>
+
+@code
+{
+	[CascadingParameter] public MainLayout? Layout { get; set; }
+	[Parameter] public bool OpenNew { get; set; } = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Layout?.EnableDrawer(false);
+
+		if (!OpenNew)
+		{
+			var dbPath = DbPathService.GetPath();
+			var dbUpdated = await DbPathService.SetPath(dbPath);
+
+			if (dbUpdated)
+				NavManager.NavigateTo("home");
+		}
+	}
+
+	private async Task Load()
+	{
+		var newPath = await DbPathService.GetPathFromUser();
+		var pathUpdated = await DbPathService.SetPath(newPath);
+
+		if (pathUpdated)
+			NavManager.NavigateTo("home");
+	}
+
+	private async Task MakeNewCampaign()
+	{
+		var newPath = await DbPathService.MakePath("NewCampaign", false);
+		var pathUpdated = await DbPathService.SetPath(newPath);
+		
+		if (pathUpdated)
+			NavManager.NavigateTo("home");
+	}
+
+}

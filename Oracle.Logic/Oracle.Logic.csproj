@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Oracle.Core\Oracle.Core.csproj" />
     <ProjectReference Include="..\Oracle.Data\Oracle.Data.csproj" />
   </ItemGroup>
 
