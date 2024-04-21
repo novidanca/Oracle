@@ -1,0 +1,13 @@
+﻿@page "/characters"
+@inherits OracleBasePage
+
+
+<h1>Characters</h1>
+<MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewCharacterButton_Clicked">Add New</MudButton>
+
+<MudDataGrid Items="AllCharacters">
+	<Columns>
+		<PropertyColumn Property="x => x.Name" Title="Name"/>
+	</Columns>
+</MudDataGrid>
+

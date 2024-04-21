@@ -1,0 +1,70 @@
+﻿@using Oracle.Logic.Services.CampaignSettings
+@inherits LayoutComponentBase
+
+
+<MudThemeProvider />
+<MudDialogProvider CloseButton="true"
+                   DisableBackdropClick="true"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true"/>
+<MudSnackbarProvider />
+
+
+<MudLayout>
+	<MudAppBar Fixed="false" Dense="true" Elevation="1">
+		@if (DrawerIsAvailable)
+		{
+			<MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+				<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+			</MudHidden>
+		}
+		<MudText Typo="Typo.h6">Oracle</MudText>
+		<MudSpacer/>
+	</MudAppBar>
+
+	@if (DrawerIsAvailable)
+	{
+		<MudDrawer @bind-Open="_drawerOpen" Elevation="5" ClipMode="DrawerClipMode.Docked">
+			<MudDrawerHeader>
+				<MudText Typo="Typo.h6">@AppTitle</MudText>
+			</MudDrawerHeader>
+			<NavMenu/>
+		</MudDrawer>
+	}
+	<MudMainContent Style="padding-top: 0;">
+		<MudContainer MaxWidth="MaxWidth.Large" Class="my-5 pt-5">
+			<CascadingValue Value="this">
+				@Body
+			</CascadingValue>
+		</MudContainer>
+	</MudMainContent>
+</MudLayout>
+
+@code
+{
+	public string AppTitle { get; set; } = "Oracle";
+	private bool DrawerIsAvailable { get; set; } = false;
+	
+	bool _drawerOpen = true;
+
+	public void EnableDrawer(bool enabled = true)
+	{
+		if (enabled)
+		{
+			DrawerIsAvailable = true;
+			_drawerOpen = true;
+		}
+		else
+		{
+			DrawerIsAvailable = false;
+			_drawerOpen = false;
+		}
+		StateHasChanged();
+	}
+
+	private void DrawerToggle()
+	{
+		_drawerOpen = !_drawerOpen;
+	}
+
+}

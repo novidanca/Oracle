@@ -1,0 +1,18 @@
+﻿@using Oracle.Core.DatabaseManagement
+@inject IDbPathService DbPath
+@inject NavigationManager NavManager
+
+
+<MudNavMenu Color="Color.Info" Bordered="true">
+	<MudNavLink Href="home" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+	<MudNavLink Href="characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People">Characters</MudNavLink>
+	<MudNavLink Href="adventures" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Map">Adventures</MudNavLink>
+	<MudNavLink Href="adventures" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ViewTimeline">Timeline</MudNavLink>
+	<MudSpacer/>
+	<MudDivider Class="my-2" />
+	<MudNavLink Href="/true" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ExitToApp">Close Campaign</MudNavLink>
+</MudNavMenu>
+
+@code{
+
+}

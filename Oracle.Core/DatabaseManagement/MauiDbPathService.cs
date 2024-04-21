@@ -33,6 +33,10 @@ public class MauiDbPathService : IDbPathService
 				//We're only calling this on windows, so this should be ok.
 				var fileResult = await FileSaver.SaveAsync(FileSystem.AppDataDirectory, fileName, stream);
 				dbPath = fileResult.FilePath;
+
+				// If the user doesn't select a file, stop
+				if (dbPath == null)
+					return null;
 			}
 			else
 			{
