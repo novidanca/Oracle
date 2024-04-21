@@ -2,10 +2,16 @@
 @using Oracle.Data.Models
 @using Oracle.Data
 @using Microsoft.EntityFrameworkCore
+@using Oracle.App.Components.Layout
+@using Oracle.Logic.Services
+@using Oracle.Logic.Services.CampaignSettings
 
-@inject OracleDbContext OracleDb
+@inject CharacterService CharacterService
+@inject CampaignSettingsService CampaignSettingsService
 
-<h1>Characters</h1>
+<h1>Home</h1>
+
+<h5>Characters</h5>
 @foreach (var character in Characters)
 {
 	<div class="card">
@@ -14,49 +20,37 @@
 	</div>
 	
 }
-<hr/>
 
-<div class="btn btn-primary" @onclick="NewChar">NewChar</div>
-
-<h1>Activity Types</h1>
-@foreach (var type in ActivityTypes)
-{
-	<div class="card">
-		<div>@type.Id</div>
-		<div>@type.Name</div>
-		<div>@type.ProjectContributionType?.Name</div>
-		<div>@type.ProjectContributionAmount</div>
-	</div>
-
-}
 
 @code
 {
+	[CascadingParameter] public MainLayout? Layout { get; set; }
+	private CampaignSettings CampaignSettings;
 	private List<Character> Characters { get; set; } = new();
-	private List<ActivityType> ActivityTypes { get; set; } = new();
 
 	protected override async Task OnInitializedAsync()
 	{
+		await GetSettings();
 		await Refresh();
+
+		UpdateLayout();
+	}
+
+	private async Task GetSettings()
+	{
+		CampaignSettings = await CampaignSettingsService.GetCampaignSettings();
+	}
+
+	private void UpdateLayout()
+	{
+		if (Layout == null) return;
+		Layout.AppTitle = CampaignSettings.CampaignName;
+		Layout.EnableDrawer();
 	}
 	
 	private async Task Refresh()
 	{
-		Characters = await OracleDb.Characters.ToListAsync();
-		ActivityTypes = await OracleDb.ActivityTypes.Include(x => x.ProjectContributionType).ToListAsync();
-	}
-	
-	private async Task NewChar()
-	{
-		var character = new Character()
-		{
-			Name = "Hi there"
-		};
-	
-		OracleDb.Characters.Add(character);
-	
-		await OracleDb.SaveChangesAsync();
-		await Refresh();
-	}
+		Characters = await CharacterService.GetAllCharacters();
 
+	}
 }

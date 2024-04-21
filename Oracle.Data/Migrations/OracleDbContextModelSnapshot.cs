@@ -38,7 +38,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("Activities", (string)null);
+                    b.ToTable("Activities");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.ActivityType", b =>
@@ -61,7 +61,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("ProjectContributionTypeId");
 
-                    b.ToTable("AcivityTypes", (string)null);
+                    b.ToTable("ActivityTypes");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Adventure", b =>
@@ -89,7 +89,22 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Adventure", (string)null);
+                    b.ToTable("Adventure");
+                });
+
+            modelBuilder.Entity("Oracle.Data.Models.CampaignSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CampaignName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CampaignSettings");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Character", b =>
@@ -108,7 +123,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("AdventureId");
 
-                    b.ToTable("Characters", (string)null);
+                    b.ToTable("Characters");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.CharacterAdventure", b =>
@@ -129,7 +144,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("CharacterAdventure", (string)null);
+                    b.ToTable("CharacterAdventure");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Project", b =>
@@ -160,7 +175,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("ProjectContributionTypeId");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.ProjectContributionType", b =>
@@ -175,7 +190,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProjectContributionTypes", (string)null);
+                    b.ToTable("ProjectContributionTypes");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Activity", b =>

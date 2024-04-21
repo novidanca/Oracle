@@ -11,8 +11,8 @@ using Oracle.Data;
 namespace Oracle.Data.Migrations
 {
     [DbContext(typeof(OracleDbContext))]
-    [Migration("20240420215642_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240421002444_AddCampaignSettings")]
+    partial class AddCampaignSettings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,6 +93,21 @@ namespace Oracle.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Adventure");
+                });
+
+            modelBuilder.Entity("Oracle.Data.Models.CampaignSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CampaignName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CampaignSettings");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Character", b =>
