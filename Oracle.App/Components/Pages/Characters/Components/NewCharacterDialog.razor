@@ -1,4 +1,6 @@
-﻿<MudDialog>
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+<MudDialog>
 	<TitleContent>
 		<MudText Typo="Typo.h6">
 			Add new character
@@ -6,6 +8,9 @@
 	</TitleContent>
 	<DialogContent>
 		<MudTextField @bind-Value="NewCharacterName" Label="Name"></MudTextField>
+		<MudAutocomplete T="Player" Label="Player" ToStringFunc="@(e => e==null?null : $"{e.Name}")" @bind-Value="SelectedPlayer" ResetValueOnEmptyText="true" SearchFunc="GetPlayers">
+
+		</MudAutocomplete>
 	</DialogContent>
 	<DialogActions>
 		<MudButton Disabled="ProcessingNewCharacter" OnClick="Cancel">Cancel</MudButton>
@@ -17,17 +22,31 @@
 
 @code
 {
+	[Inject] CharacterService CharacterService { get; set; }
 	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+	[Parameter] public List<Player> Players { get; set; } = new();
 
 	private bool ProcessingNewCharacter { get; set; } = false;
 	private string NewCharacterName { get; set; } = "";
+	private Player? SelectedPlayer { get; set; }
 
 	private async Task Submit()
 	{
 		ProcessingNewCharacter = true;
+		await CharacterService.MakeNewCharacter(NewCharacterName, SelectedPlayer);
 		
 		MudDialog.Close(DialogResult.Ok(NewCharacterName));
 	}
 
+	private async Task<IEnumerable<Player>> GetPlayers(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+			return Players;
+
+		return Players.Where(x => x.Name.Contains(value));
+	}
+
 	void Cancel() => MudDialog.Cancel();
+
 }

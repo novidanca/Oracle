@@ -4,6 +4,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MudBlazor;
 using MudBlazor.Services;
 using Oracle.Core.DatabaseManagement;
 using Oracle.Core.ServiceManagement;
@@ -38,7 +39,14 @@ public static class MauiProgram
 			return new OracleDbContext(new DbContextOptions<OracleDbContext>(), dbPath);
 		});
 
-		builder.Services.AddMudServices();
+		builder.Services.AddMudServices(config =>
+		{
+			//Snackbar Configuration
+			config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+			config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
+			config.SnackbarConfiguration.VisibleStateDuration = 5000;
+			config.SnackbarConfiguration.ShowCloseIcon = true;
+		});
 		builder.Services.AddAutoRegisteredServices();
 
 #if DEBUG

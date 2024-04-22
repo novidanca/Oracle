@@ -7,10 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Oracle.Data.Models;
 
-public partial class Character
+public class Character
 {
     [Key] public int Id { get; set; }
     public required string Name { get; set; }
+    public Player? Player { get; set; }
     public ICollection<Project> Projects { get; } = [];
     public ICollection<CharacterAdventure> Adventures { get; } = [];
     public ICollection<Activity> Activities { get; } = [];

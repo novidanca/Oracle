@@ -14,6 +14,7 @@ public partial class OracleBasePage : ComponentBase
 	[CascadingParameter] public MainLayout? Layout { get; set; }
 	[Inject] protected OracleDbContext Db { get; set; }
 	[Inject] protected IDialogService DialogService { get; set; }
+	[Inject] protected ISnackbar Snackbar { get; set; }
 
 	protected virtual async Task Refresh()
 	{

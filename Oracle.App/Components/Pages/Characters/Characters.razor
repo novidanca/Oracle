@@ -1,13 +1,39 @@
 ﻿@page "/characters"
+@using Size = Microsoft.Maui.Graphics.Size
 @inherits OracleBasePage
 
+<OracleTitle Title="Characters" />
 
-<h1>Characters</h1>
 <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewCharacterButton_Clicked">Add New</MudButton>
 
 <MudDataGrid Items="AllCharacters">
 	<Columns>
 		<PropertyColumn Property="x => x.Name" Title="Name"/>
+		<TemplateColumn Title="Player">
+			<CellTemplate>
+				@{
+					var character = context.Item;
+					if (character.Player == null)
+					{
+						<div>NPC</div>
+					}
+					else
+					{
+						<div>@character.Player.Name</div>
+					}
+				}
+			</CellTemplate>
+		</TemplateColumn>
+		<TemplateColumn>
+			<CellTemplate>
+				@{
+					var character = context.Item;
+					<MudStack Row>
+						<MudButton Size="MudBlazor.Size.Small" OnClick="() => OnCharacterDeleteButton_Clicked(character)">Delete</MudButton>
+					</MudStack>
+				}
+			</CellTemplate>
+		</TemplateColumn>
 	</Columns>
 </MudDataGrid>
 

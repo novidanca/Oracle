@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.Data;
 
@@ -10,9 +11,11 @@ using Oracle.Data;
 namespace Oracle.Data.Migrations
 {
     [DbContext(typeof(OracleDbContext))]
-    partial class OracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240422150523_AddPlayers")]
+    partial class AddPlayers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -38,7 +41,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("Activities", (string)null);
+                    b.ToTable("Activities");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.ActivityType", b =>
@@ -61,7 +64,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("ProjectContributionTypeId");
 
-                    b.ToTable("ActivityTypes", (string)null);
+                    b.ToTable("ActivityTypes");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Adventure", b =>
@@ -89,7 +92,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Adventure", (string)null);
+                    b.ToTable("Adventure");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.CampaignSettings", b =>
@@ -104,7 +107,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CampaignSettings", (string)null);
+                    b.ToTable("CampaignSettings");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Character", b =>
@@ -128,7 +131,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("Characters", (string)null);
+                    b.ToTable("Characters");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.CharacterAdventure", b =>
@@ -149,7 +152,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("CharacterAdventure", (string)null);
+                    b.ToTable("CharacterAdventure");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Player", b =>
@@ -164,7 +167,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players", (string)null);
+                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Project", b =>
@@ -195,7 +198,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasIndex("ProjectContributionTypeId");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.ProjectContributionType", b =>
@@ -210,7 +213,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProjectContributionTypes", (string)null);
+                    b.ToTable("ProjectContributionTypes");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Activity", b =>
