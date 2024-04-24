@@ -16,6 +16,12 @@ public partial class OracleBasePage : ComponentBase
 	[Inject] protected IDialogService DialogService { get; set; }
 	[Inject] protected ISnackbar Snackbar { get; set; }
 
+	protected override async Task OnInitializedAsync()
+	{
+		await Refresh();
+		StateHasChanged();
+	}
+
 	protected virtual async Task Refresh()
 	{
 		return;

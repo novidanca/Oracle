@@ -13,6 +13,6 @@ public class Character
     public required string Name { get; set; }
     public Player? Player { get; set; }
     public ICollection<Project> Projects { get; } = [];
-    public ICollection<CharacterAdventure> Adventures { get; } = [];
+    public ICollection<AdventureCharacter> AdventureCharacters { get; } = [];
     public ICollection<Activity> Activities { get; } = [];
 }

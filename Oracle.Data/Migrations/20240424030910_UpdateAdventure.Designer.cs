@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.Data;
 
@@ -10,9 +11,11 @@ using Oracle.Data;
 namespace Oracle.Data.Migrations
 {
     [DbContext(typeof(OracleDbContext))]
-    partial class OracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240424030910_UpdateAdventure")]
+    partial class UpdateAdventure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -89,25 +92,7 @@ namespace Oracle.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Adventures");
-                });
-
-            modelBuilder.Entity("Oracle.Data.Models.AdventureCharacter", b =>
-                {
-                    b.Property<int>("AdventureId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("AdventureId", "CharacterId");
-
-                    b.HasIndex("CharacterId");
-
-                    b.ToTable("AdventureCharacters");
+                    b.ToTable("Adventure");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.CampaignSettings", b =>
@@ -142,6 +127,27 @@ namespace Oracle.Data.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("Characters");
+                });
+
+            modelBuilder.Entity("Oracle.Data.Models.CharacterAdventure", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AdventureId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdventureId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("CharacterAdventure");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Player", b =>
@@ -233,25 +239,6 @@ namespace Oracle.Data.Migrations
                     b.Navigation("ProjectContributionType");
                 });
 
-            modelBuilder.Entity("Oracle.Data.Models.AdventureCharacter", b =>
-                {
-                    b.HasOne("Oracle.Data.Models.Adventure", "Adventure")
-                        .WithMany("AdventureCharacters")
-                        .HasForeignKey("AdventureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Oracle.Data.Models.Character", "Character")
-                        .WithMany("AdventureCharacters")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Adventure");
-
-                    b.Navigation("Character");
-                });
-
             modelBuilder.Entity("Oracle.Data.Models.Character", b =>
                 {
                     b.HasOne("Oracle.Data.Models.Player", "Player")
@@ -259,6 +246,25 @@ namespace Oracle.Data.Migrations
                         .HasForeignKey("PlayerId");
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("Oracle.Data.Models.CharacterAdventure", b =>
+                {
+                    b.HasOne("Oracle.Data.Models.Adventure", "Adventure")
+                        .WithMany("CharacterAdventures")
+                        .HasForeignKey("AdventureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Oracle.Data.Models.Character", "Character")
+                        .WithMany("CharacterAdventures")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Adventure");
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Project", b =>
@@ -280,14 +286,14 @@ namespace Oracle.Data.Migrations
 
             modelBuilder.Entity("Oracle.Data.Models.Adventure", b =>
                 {
-                    b.Navigation("AdventureCharacters");
+                    b.Navigation("CharacterAdventures");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Character", b =>
                 {
                     b.Navigation("Activities");
 
-                    b.Navigation("AdventureCharacters");
+                    b.Navigation("CharacterAdventures");
 
                     b.Navigation("Projects");
                 });

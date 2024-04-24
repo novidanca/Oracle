@@ -13,13 +13,8 @@ namespace Oracle.App.Components.Pages.Characters;
 
 public partial class Characters : OracleBasePage
 {
-	[Inject] private CharacterService CharacterService { get; set; }
+	[Inject] private CharacterService CharacterService { get; set; } = null!;
 	private List<Character> AllCharacters { get; set; } = new();
-
-	protected override async Task OnInitializedAsync()
-	{
-		await Refresh();
-	}
 
 	protected override async Task Refresh()
 	{

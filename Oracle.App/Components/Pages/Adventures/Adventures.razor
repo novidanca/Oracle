@@ -1,4 +1,61 @@
 ﻿@page "/adventures"
 @inherits OracleBasePage
 
-<OracleTitle Title="Adventures"/>
+<OracleTitle Title="Adventures">
+	<TitleContent>
+		<MudButton Color="Color.Primary"
+		           Variant="Variant.Outlined"
+		           OnClick="NewAdventureButton_Clicked">
+			Add New
+		</MudButton>
+	</TitleContent>
+</OracleTitle>
+
+<MudExpansionPanels>
+	<MudExpansionPanel Disabled="true" HideIcon="true" IsExpanded="IsSearchFilterExpanded">
+		<TitleContent>
+			<div class="d-flex align-center">
+				<div class="me-auto">
+					<MudTextField T="string" DebounceInterval="300" OnDebounceIntervalElapsed="OnSearchQueryChanged" Label="Search..."/>
+				</div>
+				<MudButton OnClick="@(() => IsSearchFilterExpanded = !IsSearchFilterExpanded)">Filters</MudButton>
+			</div>
+		</TitleContent>
+		<ChildContent>
+			<MudSlider @bind-Value="StartDay" Min="0" Max="MaxStartDay">Start Day: @StartDay</MudSlider>
+			<MudSlider @bind-Value="EndDay" Min="0" Max="MaxStartDay + 30">End Day: @EndDay</MudSlider>
+			<MudButton OnClick="OnSearchFiltersApplied">Apply</MudButton>
+		</ChildContent>
+	</MudExpansionPanel>
+</MudExpansionPanels>
+
+<MudDataGrid Items="@(!string.IsNullOrEmpty(SearchQuery) ? SearchResultAdventures : RelevantAdventures)">
+	<Columns>
+		<PropertyColumn Property="x => x.Name" Title="Name" />
+		<PropertyColumn Property="x => x.StartDay" Title="Start Date" />
+		<PropertyColumn Property="x => x.Duration" Title="Duration" />
+		<TemplateColumn Title="Characters">
+			<CellTemplate>
+				@{
+					var adventure = context.Item;
+					foreach (var advChar in adventure.AdventureCharacters)
+					{
+						<div>@advChar.Character.Name</div>
+					}
+				}
+			</CellTemplate>
+		</TemplateColumn>
+		<TemplateColumn>
+			<CellTemplate>
+				@{
+					var character = context.Item;
+					<MudStack Row>
+						Buttons Here
+					</MudStack>
+				}
+			</CellTemplate>
+		</TemplateColumn>
+	</Columns>
+	
+
+</MudDataGrid>

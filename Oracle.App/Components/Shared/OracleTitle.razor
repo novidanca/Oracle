@@ -1,8 +1,18 @@
-﻿<h1>@Title</h1>
+﻿<div class="d-flex align-center mb-5">
+	<h1 class="me-auto">@Title</h1>
+	@if (TitleContent != null)
+	{
+		<div>
+			@TitleContent
+		</div>
+	}
+</div>
+
 
 
 
 @code
 {
 	[Parameter] public required string Title { get; set; }
+	[Parameter] public RenderFragment? TitleContent { get; set; }
 }

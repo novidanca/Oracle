@@ -1,0 +1,53 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+
+
+<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			Add new adventure
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="NewAdventureName"></MudTextField>
+		<MudTextField Variant="Variant.Outlined" Label="Description" @bind-Value="NewAdventureDescription" Lines="5"></MudTextField>
+		<MudSelect T="Character" Label="Characters" MultiSelection="true" @bind-SelectedValues="SelectedCharacters">
+			@foreach (var character in Characters)
+			{
+				<MudSelectItem T="Character" Value="@character">@character.Name</MudSelectItem>
+			}
+		</MudSelect>
+	</DialogContent>
+	<DialogActions>
+		<MudButton Disabled="ProcessingNewAdventure" OnClick="Cancel">Cancel</MudButton>
+		<MudButton Disabled="ProcessingNewAdventure" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+	</DialogActions>
+</MudDialog>
+
+
+
+@code
+{
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	[Inject] AdventureService AdventureService { get; set; } = null!;
+
+	//State
+	[Parameter] public List<Character> Characters { get; set; } = new();
+	private bool ProcessingNewAdventure { get; set; } = false;
+
+	// Adventure Fields
+	private IEnumerable<Character> SelectedCharacters { get; set; } = [];
+	private List<Character> SelectedCharactersList => SelectedCharacters.ToList();
+	private string NewAdventureName { get; set; }
+	private string NewAdventureDescription { get; set; }
+
+	private async Task Submit()
+	{
+		ProcessingNewAdventure = true;
+		await AdventureService.AddAdventure(NewAdventureName, NewAdventureDescription, SelectedCharactersList);
+
+		MudDialog.Close(DialogResult.Ok(NewAdventureName));
+	}
+
+	void Cancel() => MudDialog.Cancel();
+}

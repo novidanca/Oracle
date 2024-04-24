@@ -2,9 +2,17 @@
 @using Size = Microsoft.Maui.Graphics.Size
 @inherits OracleBasePage
 
-<OracleTitle Title="Characters" />
+<OracleTitle Title="Characters">
+	<TitleContent>
+		<MudButton Color="Color.Primary"
+		           Variant="Variant.Outlined"
+		           OnClick="NewCharacterButton_Clicked">
+			Add New
+		</MudButton>
+	</TitleContent>
+</OracleTitle>
 
-<MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewCharacterButton_Clicked">Add New</MudButton>
+
 
 <MudDataGrid Items="AllCharacters">
 	<Columns>
