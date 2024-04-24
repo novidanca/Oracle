@@ -1,5 +1,5 @@
 ﻿namespace Oracle.App.Components.Pages.Players;
 
-public partial class Players : OracleBasePage
+public partial class PlayersPage : OracleBasePage
 {
 }

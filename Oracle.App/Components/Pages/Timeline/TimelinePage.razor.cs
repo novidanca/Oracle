@@ -1,5 +1,5 @@
 ﻿namespace Oracle.App.Components.Pages.Timeline;
 
-public partial class Timeline : OracleBasePage
+public partial class TimelinePage : OracleBasePage
 {
 }

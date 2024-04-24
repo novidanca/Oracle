@@ -16,6 +16,7 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 			.Include(x => x.AdventureCharacters)
 			.ThenInclude(x => x.Character)
 			.OrderByDescending(x => x.StartDay).Take(numberOfAdventures)
+			.AsSplitQuery()
 			.ToListAsync();
 	}
 
@@ -30,9 +31,18 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 			.Take(numberOfResults)
 			.Include(x => x.AdventureCharacters)
 			.ThenInclude(x => x.Character)
+			.AsSplitQuery()
 			.ToListAsync();
 	}
 
+	public async Task<Adventure> GetAdventure(int adventureId)
+	{
+		return await Db.Adventures.Where(x => x.Id == adventureId)
+			.Include(x => x.AdventureCharacters)
+			.ThenInclude(x => x.Character)
+			.AsSplitQuery()
+			.FirstOrDefaultAsync();
+	}
 
 	public async Task AddAdventure(string name, string description, List<Character>? characters = null)
 	{

@@ -1,0 +1,24 @@
+﻿@page "/adventureDetail/{AdventureId:int}"
+@inherits OracleBasePage
+
+<OracleTitle Title="@Adventure?.Name">
+</OracleTitle>
+
+@if (Adventure != null)
+{
+	<div class="d-flex">
+		<div class="d-flex flex-column">
+			<div>@Adventure.Name</div>
+			<div>Characters:</div>
+			@foreach (var character in Adventure.AdventureCharacters)
+			{
+				<div>@character.Character.Name</div>
+			}
+		</div>
+		<div>@Adventure.Description</div>
+	</div>
+}
+else
+{
+	<div>Loading...</div>
+}

@@ -8,7 +8,7 @@ using Oracle.Logic.Services.CampaignSettings;
 
 namespace Oracle.App.Components.Pages.Home;
 
-public partial class Home : OracleBasePage
+public partial class HomePage : OracleBasePage
 {
 	[Inject] private CampaignSettingsService SettingsService { get; set; }
 

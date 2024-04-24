@@ -11,7 +11,7 @@ using Oracle.Logic.Services;
 
 namespace Oracle.App.Components.Pages.Characters;
 
-public partial class Characters : OracleBasePage
+public partial class CharactersPage : OracleBasePage
 {
 	[Inject] private CharacterService CharacterService { get; set; } = null!;
 	private List<Character> AllCharacters { get; set; } = new();

@@ -31,9 +31,17 @@
 
 <MudDataGrid Items="@(!string.IsNullOrEmpty(SearchQuery) ? SearchResultAdventures : RelevantAdventures)">
 	<Columns>
-		<PropertyColumn Property="x => x.Name" Title="Name" />
-		<PropertyColumn Property="x => x.StartDay" Title="Start Date" />
-		<PropertyColumn Property="x => x.Duration" Title="Duration" />
+		<TemplateColumn Title="Adventure">
+			<CellTemplate>
+				@{
+					var adventure = context.Item;
+					<MudHighlighter Text="@adventure.Name" HighlightedText="@SearchQuery"/>
+				}
+			</CellTemplate>
+		</TemplateColumn>
+		<PropertyColumn Property="x => x.Name" Title="Name"/>
+		<PropertyColumn Property="x => x.StartDay" Title="Start Date"/>
+		<PropertyColumn Property="x => x.Duration" Title="Duration"/>
 		<TemplateColumn Title="Characters">
 			<CellTemplate>
 				@{
@@ -48,10 +56,13 @@
 		<TemplateColumn>
 			<CellTemplate>
 				@{
-					var character = context.Item;
-					<MudStack Row>
-						Buttons Here
-					</MudStack>
+					var adventure = context.Item;
+					@if (adventure != null)
+					{
+						<MudStack Row>
+							<MudButton OnClick="@(() => ViewAdventure_Clicked(@adventure.Id))">View</MudButton>
+						</MudStack>
+					}
 				}
 			</CellTemplate>
 		</TemplateColumn>

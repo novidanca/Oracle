@@ -11,7 +11,7 @@ using Oracle.Logic.Services;
 
 namespace Oracle.App.Components.Pages.Adventures;
 
-public partial class Adventures : OracleBasePage
+public partial class AdventuresPage : OracleBasePage
 {
 	[Inject] private AdventureService AdventureService { get; set; } = null!;
 
@@ -67,5 +67,10 @@ public partial class Adventures : OracleBasePage
 		if (!string.IsNullOrEmpty(SearchQuery))
 			SearchResultAdventures =
 				await AdventureService.SearchAdventures(SearchQuery, StartDay, EndDay, QuerySize, Skip);
+	}
+
+	private void ViewAdventure_Clicked(int adventureId)
+	{
+		NavManager.NavigateTo($"/adventureDetail/{adventureId}");
 	}
 }

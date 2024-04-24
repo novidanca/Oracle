@@ -15,6 +15,7 @@ public partial class OracleBasePage : ComponentBase
 	[Inject] protected OracleDbContext Db { get; set; }
 	[Inject] protected IDialogService DialogService { get; set; }
 	[Inject] protected ISnackbar Snackbar { get; set; }
+	[Inject] protected NavigationManager NavManager { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
