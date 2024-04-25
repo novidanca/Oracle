@@ -30,8 +30,6 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 			.ToListAsync();
 	}
 
-	#endregion
-
 	public async Task<List<Adventure>> GetRelevantAdventures(int numberOfAdventures = 5)
 	{
 		var adventureIds = await Db.Adventures.Where(x => !x.IsComplete)
@@ -59,6 +57,10 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 		return await GetAdventures(adventureIds);
 	}
 
+	#endregion
+
+	#region Creation
+
 	public async Task AddAdventure(string name, string description)
 	{
 		var adventure = new Adventure()
@@ -71,18 +73,66 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 		await Db.SaveChangesAsync();
 	}
 
+	public async Task<bool> TryStartAdventure(int adventureId, int startDay, List<int> characterIds)
+	{
+		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
+
+		// Check characters are free that day. If so, add them to the adventure.
+
+
+		// Start the adventure
+
+		return false;
+	}
+
+	#endregion
+
+	#region Modification
+
+	public async Task<bool> TryAddAdventureDay(int adventureId)
+	{
+		// Check adventure is started
+
+		// Check characters are free on the new day. If so, add the day.
+
+		return false;
+	}
+
+
+	public async Task<bool> TryEndAdventure(int adventureId)
+	{
+		// Check adventure is started
+
+		// End Adventure
+		// Set Complete = true
+
+		// For each character, get the adventure on the Timeline and set the end date
+
+		return false;
+	}
+
+	#endregion
+
+
 	public async Task<int> GetMaxStartDay()
 	{
 		return await Db.Adventures.MaxAsync(x => x.StartDay);
 	}
 
-	public async Task<Adventure> AddCharacterToAdventure(int adventureId, int characterId)
+	public async Task<Adventure> TryAddCharacterToAdventure(int adventureId, int characterId)
 	{
+		// Get the adventure dates
+
+		// Check the character is free within those dates
+
+		// Connect the character and adventure
 		var advChar = new AdventureCharacter()
 		{
 			AdventureId = adventureId,
 			CharacterId = characterId
 		};
+
+		// Add the adventure to the timeline
 
 		Db.AdventureCharacters.Add(advChar);
 		await Db.SaveChangesAsync();
@@ -97,7 +147,10 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 		if (advChar == null)
 			return false;
 
+		// Remove adventure from CharacterTimeline
+
 		Db.AdventureCharacters.Remove(advChar);
+
 		await Db.SaveChangesAsync();
 
 		return true;

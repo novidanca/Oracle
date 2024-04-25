@@ -10,9 +10,12 @@ namespace Oracle.Data.Models;
 public class Character
 {
     [Key] public int Id { get; set; }
-    public required string Name { get; set; }
+    [Required] public string Name { get; set; }
+    public int? PlayerId { get; set; }
     public Player? Player { get; set; }
     public ICollection<Project> Projects { get; } = [];
     public ICollection<AdventureCharacter> AdventureCharacters { get; } = [];
     public ICollection<Activity> Activities { get; } = [];
+    public ICollection<CharacterStatus> Statuses { get; } = [];
+    public ICollection<CharacterTimeline> Timeline { get; } = [];
 }

@@ -10,7 +10,7 @@ namespace Oracle.App.Components.Pages.Home;
 
 public partial class HomePage : OracleBasePage
 {
-	[Inject] private CampaignSettingsService SettingsService { get; set; }
+	[Inject] private CampaignSettingsService SettingsService { get; set; } = null!;
 
 	private CampaignSettings CampaignSettings;
 

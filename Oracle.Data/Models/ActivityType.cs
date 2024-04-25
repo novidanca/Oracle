@@ -9,7 +9,9 @@ namespace Oracle.Data.Models;
 public class ActivityType
 {
 	[Key] public int Id { get; set; }
-	public required string Name { get; set; }
+	[Required] public string Name { get; set; }
+
+	public int? ProjectContributionTypeId { get; set; }
 	public ProjectContributionType? ProjectContributionType { get; set; }
 	public int ProjectContributionAmount { get; set; }
 }
