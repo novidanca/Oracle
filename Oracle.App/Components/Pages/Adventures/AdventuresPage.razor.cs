@@ -1,7 +1,6 @@
 ﻿#region using
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Oracle.App.Components.Pages.Adventures.Components;
 using Oracle.Data.Models;
@@ -38,12 +37,7 @@ public partial class AdventuresPage : OracleBasePage
 
 	private async Task NewAdventureButton_Clicked()
 	{
-		var parameters = new DialogParameters<NewAdventureDialog>();
-		var characters = await Db.Characters.ToListAsync();
-
-		parameters.Add(x => x.Characters, characters);
-
-		var dialog = await DialogService.ShowAsync<NewAdventureDialog>("Add new adventure", parameters);
+		var dialog = await DialogService.ShowAsync<NewAdventureDialog>("Add new adventure");
 		var result = await dialog.Result;
 
 		if (!result.Canceled)
