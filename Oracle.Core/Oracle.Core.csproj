@@ -8,7 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Maui" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.14" />
+    <PackageReference Include="Ether.Outcomes" Version="2.9.5" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.21" />
   </ItemGroup>
 
   <ItemGroup>

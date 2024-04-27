@@ -1,5 +1,6 @@
 ﻿#region using
 
+using Ether.Outcomes;
 using Microsoft.EntityFrameworkCore;
 using Oracle.Data;
 using Oracle.Data.Models;
@@ -8,7 +9,7 @@ using Oracle.Data.Models;
 
 namespace Oracle.Logic.Services;
 
-public class AdventureService(OracleDbContext db) : ServiceBase(db)
+public class AdventureService(OracleDbContext db, TimelineService timelineService) : ServiceBase(db)
 {
 	#region Adventure Getters
 
@@ -73,16 +74,26 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 		await Db.SaveChangesAsync();
 	}
 
-	public async Task<bool> TryStartAdventure(int adventureId, int startDay, List<int> characterIds)
+	public async Task<IOutcome> TryStartAdventure(int adventureId, int startDay, List<int> characterIds)
 	{
 		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
 
-		// Check characters are free that day. If so, add them to the adventure.
+		if (adventure == null)
+			return Outcomes.Failure().WithMessage($"No adventure with id {adventureId} exists");
 
+		// Check characters are free that day. If so, add them to the adventure.
+		foreach (var character in characterIds)
+		{
+			var result = await timelineService.AddToCharacterTimeline(adventure, character);
+			if (result.Failure)
+				return result;
+		}
 
 		// Start the adventure
-
-		return false;
+		adventure.IsStarted = true;
+		await Db.SaveChangesAsync();
+		
+		return Outcomes.Success();
 	}
 
 	#endregion
@@ -116,7 +127,12 @@ public class AdventureService(OracleDbContext db) : ServiceBase(db)
 
 	public async Task<int> GetMaxStartDay()
 	{
-		return await Db.Adventures.MaxAsync(x => x.StartDay);
+		var adventures = await Db.Adventures.Select(x => x.StartDay).ToListAsync();
+
+		if (!adventures.Any())
+			return 0;
+
+		return adventures.Max();
 	}
 
 	public async Task<Adventure> TryAddCharacterToAdventure(int adventureId, int characterId)
