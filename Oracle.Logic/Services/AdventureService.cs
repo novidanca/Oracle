@@ -135,11 +135,23 @@ public class AdventureService(OracleDbContext db, TimelineService timelineServic
 		return adventures.Max();
 	}
 
-	public async Task<Adventure> TryAddCharacterToAdventure(int adventureId, int characterId)
+	public async Task<IOutcome<Adventure>> TryAddCharacterToAdventure(int adventureId, int characterId)
 	{
 		// Get the adventure dates
+		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
+		var character = await Db.Characters.FirstOrDefaultAsync(x => x.Id == characterId);
+
+		if (adventure == null)
+			return Outcomes.Failure<Adventure>().WithMessage($"Adventure {adventureId} does not exist");
+
+		if (character == null)
+			return Outcomes.Failure<Adventure>().WithMessage($"Character {characterId} does not exist");
 
 		// Check the character is free within those dates
+		var timelineOutcome = await timelineService.AddToCharacterTimeline(adventure, characterId);
+
+		if (timelineOutcome.Failure)
+			return Outcomes.Failure<Adventure>().WithMessagesFrom(timelineOutcome);
 
 		// Connect the character and adventure
 		var advChar = new AdventureCharacter()
@@ -147,13 +159,13 @@ public class AdventureService(OracleDbContext db, TimelineService timelineServic
 			AdventureId = adventureId,
 			CharacterId = characterId
 		};
-
-		// Add the adventure to the timeline
-
+		
 		Db.AdventureCharacters.Add(advChar);
 		await Db.SaveChangesAsync();
 
-		return await GetAdventure(adventureId);
+		var updatedAdventure = await GetAdventure(adventureId);
+
+		return Outcomes.Success<Adventure>(updatedAdventure);
 	}
 
 	public async Task<bool> RemoveCharacterFromAdventure(int adventureId, int characterId)

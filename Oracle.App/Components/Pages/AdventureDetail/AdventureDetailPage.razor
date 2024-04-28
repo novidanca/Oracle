@@ -10,6 +10,11 @@
 	</PostTitleContent>
 	<CommandAreaContent>
 		<MudButton OnClick="UpdateAdventure">Save Changes</MudButton>
+		@if (Adventure is {IsStarted: false })
+		{
+			<MudButton OnClick="StartAdventure">Start Adventure</MudButton>
+		}
+		
 	</CommandAreaContent>
 </OracleTitle>
 
@@ -48,7 +53,7 @@
 							<MudText Typo="Typo.h6">Characters</MudText>
 						</CardHeaderContent>
 						<CardHeaderActions>
-							<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default"/>
+							<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" OnClick="AddCharacter"/>
 						</CardHeaderActions>
 					</MudCardHeader>
 					<MudCardContent>

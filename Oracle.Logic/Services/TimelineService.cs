@@ -2,9 +2,10 @@
 
 using Ether.Outcomes;
 using Microsoft.EntityFrameworkCore;
-using Oracle.Core.Outcomes;
 using Oracle.Data;
 using Oracle.Data.Models;
+using System.Diagnostics;
+
 
 #endregion
 
@@ -12,31 +13,67 @@ namespace Oracle.Logic.Services;
 
 public class TimelineService(OracleDbContext db) : ServiceBase(db)
 {
-	public async Task<IOutcome> IsCharacterAvailable(int characterId, int day)
+	#region Getters
+
+	public async Task<CharacterTimeline> GetCharacterTimeline(int timelineId)
 	{
-		var activity = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId)
-			.Select(x => new {x.StartDay, x.EndDay, x.Character.Name})
-			.AsNoTracking()
-			.FirstOrDefaultAsync(x => day >= x.StartDay && (x.EndDay == null || day <= x.EndDay));
-
-		if (activity == null)
-			return Outcomes.Success();
-
-		return Outcomes.Failure().WithMessage($"{activity.Name} is not available on day {day}");
+		return await Db.CharacterTimelines.Where(x => x.Id == timelineId)
+			.Include(x => x.Character)
+			.Include(x => x.Adventure)
+			.Include(x => x.Activity)
+			.Include(x => x.Status)
+			.AsSplitQuery()
+			.FirstAsync();
 	}
 
-	public async Task<IOutcome> IsCharacterAvailable(int characterId, int startDay, int endDay)
-	{
-		var activity = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId)
-			.Select(x => new {x.StartDay, x.EndDay, x.Character.Name})
-			.FirstOrDefaultAsync(x => x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
+	#endregion
 
-		if (activity == null)
+	#region Checks
+
+	public async Task<IOutcome> IsCharacterAvailable(int characterId, int startDay, int? endDay = null)
+	{
+		var character = Db.Characters.First(x => x.Id == characterId);
+		CharacterTimeline? blockingActivity;
+		
+		if (endDay.HasValue)
+		{
+			blockingActivity = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId)
+				.FirstOrDefaultAsync(x => x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
+		}
+		else
+		{
+			blockingActivity = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId)
+				.FirstOrDefaultAsync(x => x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
+		}
+		
+		if (blockingActivity == null)
 			return Outcomes.Success();
 
-		return Outcomes.Failure().WithMessage($"{activity.Name} is not available on between {startDay} and {endDay}");
+		return endDay.HasValue
+			? Outcomes.Failure().WithMessage($"{character.Name} is not available on between {startDay} and {endDay}")
+			: Outcomes.Failure().WithMessage($"{character.Name} is not available on day {startDay}");
 	}
 
+	public async Task<CharacterTimeline?> GetBlockingTimelineEvent(int characterId, int startDay, int? endDay = null)
+	{
+		var characterAvailable = endDay.HasValue
+			? await IsCharacterAvailable(characterId, startDay, endDay.Value)
+			: await IsCharacterAvailable(characterId, startDay);
+
+		if (characterAvailable.Success)
+			return null;
+
+		var timelineId = endDay.HasValue
+			? Db.CharacterTimelines.First(x => x.Id == characterId
+				&& x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay)).Id
+			: Db.CharacterTimelines.First(x => x.Id == characterId
+				&& startDay >= x.StartDay && (x.EndDay == null || startDay <= x.EndDay)).Id;
+
+		return await GetCharacterTimeline(timelineId);
+	}
+
+	#endregion
+	
 
 	public async Task<IOutcome> AddToCharacterTimeline(Adventure adventure, int characterId)
 	{
@@ -57,6 +94,60 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		await Db.SaveChangesAsync();
 
 		return Outcomes.Success();
+	}
+
+	public async Task<IOutcome> AddToCharacterTimeline(Activity activity, int characterId)
+	{
+		var characterAvailable = await IsCharacterAvailable(characterId, activity.Date);
+
+		if (characterAvailable.Failure)
+			return characterAvailable;
+
+		var timeline = new CharacterTimeline()
+		{
+			ActivityId = activity.Id,
+			CharacterId = characterId,
+			StartDay = activity.Date,
+			EndDay = activity.Date
+		};
+
+		Db.CharacterTimelines.Add(timeline);
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
+
+	}
+
+	public async Task<IOutcome> AddToCharacterTimeline(CharacterStatus status, int characterId)
+	{
+		if (status.CanQuest)
+			return Outcomes.Failure().WithMessage("Cannot add a non-blocking status to the timeline.");
+
+		var characterAvailable = await IsCharacterAvailable(characterId, status.StartDay, status.EndDay);
+
+		if (characterAvailable.Failure)
+		{
+			var blockingTimeline = await GetBlockingTimelineEvent(characterId, status.StartDay, status.EndDay);
+			// We have a blockingTimeline event. It's not null here.
+
+			if (blockingTimeline != null)
+			{
+				blockingTimeline.EndDay = status.StartDay - 1;
+			}
+		}
+
+		var timeline = new CharacterTimeline()
+		{
+			CharacterId = characterId,
+			StartDay = status.StartDay,
+			EndDay = status.EndDay
+		};
+
+		Db.CharacterTimelines.Add(timeline);
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
+
 	}
 
 
@@ -106,4 +197,11 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 	//
 	//	return await GetCharacters(loadIds, loadOptions);
 	//}
+}
+
+public enum TimelineEntityTypes
+{
+	Adventure,
+	Activity,
+	BlockingStatus
 }
