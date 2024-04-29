@@ -41,6 +41,17 @@ public partial class AdventureDetailPage : OracleBasePage
 		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Adventure started", outcome.Failure ? Severity.Error : Severity.Success);
 	}
 
+	private async Task EndAdventure()
+	{
+		var outcome = await AdventureService.TryEndAdventure(AdventureId);
+
+		if (outcome.Success)
+			await Refresh();
+
+		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Adventure ended",
+			outcome.Failure ? Severity.Error : Severity.Success);
+	}
+
 
 	private async Task AddCharacter()
 	{

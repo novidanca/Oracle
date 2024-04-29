@@ -9,7 +9,7 @@ using Oracle.Data.Models;
 
 namespace Oracle.Logic.Services;
 
-public class AdventureService(OracleDbContext db, TimelineService timelineService) : ServiceBase(db)
+public class AdventureService(OracleDbContext db, TimelineService.TimelineService timelineService) : ServiceBase(db)
 {
 	#region Adventure Getters
 
@@ -110,16 +110,31 @@ public class AdventureService(OracleDbContext db, TimelineService timelineServic
 	}
 
 
-	public async Task<bool> TryEndAdventure(int adventureId)
+	public async Task<IOutcome> TryEndAdventure(int adventureId)
 	{
-		// Check adventure is started
+		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
 
-		// End Adventure
-		// Set Complete = true
+		if (adventure == null)
+			return Outcomes.Failure().WithMessage($"Adventure {adventureId} does not exist");
 
-		// For each character, get the adventure on the Timeline and set the end date
+		if (!adventure.IsStarted)
+			return Outcomes.Failure().WithMessage("Adventure has not started");
 
-		return false;
+		if (adventure.IsComplete)
+			return Outcomes.Failure().WithMessage("Adventure is already complete");
+
+		adventure.IsComplete = true;
+
+		var timelineItems = await Db.CharacterTimelines.Where(x => x.AdventureId == adventureId).ToListAsync();
+
+		foreach (var item in timelineItems)
+		{
+			item.EndDay = adventure.StartDay + adventure.Duration;
+		}
+
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
 	}
 
 	#endregion

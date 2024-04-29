@@ -14,7 +14,10 @@
 		{
 			<MudButton OnClick="StartAdventure">Start Adventure</MudButton>
 		}
-		
+		@if (Adventure is {IsStarted : true} && Adventure is {IsComplete: false})
+		{
+			<MudButton OnClick="EndAdventure">End Adventure</MudButton>
+		}
 	</CommandAreaContent>
 </OracleTitle>
 

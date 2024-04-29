@@ -2,3 +2,21 @@
 @inherits OracleBasePage
 
 <OracleTitle Title="Players" />
+
+
+@foreach (var timeline in Timeline)
+{
+	<div class="d-flex">
+		@timeline.CharacterId
+	</div>
+	<div>
+		@timeline.Date
+	</div>
+	<div>
+		@timeline.Type
+	</div>
+	<div>
+		@timeline.Description
+	</div>
+	<hr/>
+}
