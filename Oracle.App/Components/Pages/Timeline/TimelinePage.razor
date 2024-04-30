@@ -1,4 +1,72 @@
 ﻿@page "/timeline"
+@using Oracle.Logic.Services.TimelineService
 @inherits OracleBasePage
 
 <OracleTitle Title="Timeline" />
+
+<table>
+	<tr>
+		<th class="me-3">Character</th>
+		<th></th>
+		<th class="timeline-Container">
+			@foreach (var day in TimelineDays)
+			{
+				<div class="timeline-Item">@day</div>
+			}
+		</th>
+	</tr>
+	@foreach (var character in Characters)
+	{
+		int? previousTimelineId = null;
+		var currentSpanCount = 1;
+		TimelineDateVm? previousDay = null;
+
+		<tr>
+			<td class="me-3">@character.Name</td>
+			<td></td>
+			<td class="timeline-Container">
+				@for (var i = TimelineDays.Min(); i <= TimelineDays.Max(); i++)
+				{
+					var currentDate = i;
+					var day = Timeline.First(x => x.CharacterId == character.Id && x.Date == currentDate);
+
+					// Check if the previous day was the end of a chain, If so, add that chain
+					if (previousTimelineId != null && day.TimelineId.HasValue && day.TimelineId != previousTimelineId)
+					{
+						var cssClass = day.Type switch
+						{
+							TimelineEntityTypes.Adventure => "timeline-Adventure",
+							TimelineEntityTypes.Activity => "timeline-Activity",
+							TimelineEntityTypes.BlockingStatus => "timeline-Status",
+							_ => "timeline-Nothing"
+						};
+
+						var completionClass = day.IsComplete ? "" : "incomplete";
+
+						<div class="timeline-Item timeline-Span @cssClass @completionClass" style="flex-grow: @currentSpanCount;">@previousDay?.Description</div>
+
+						currentSpanCount = 1;
+						previousDay = null;
+					}
+
+					//None
+					if (!day.TimelineId.HasValue)
+					{
+						<div class="timeline-Item timeline-Nothing" style="flex-grow: 1;">X</div>
+					}
+					else if (day.TimelineId != previousTimelineId)
+					{
+						previousTimelineId = day.TimelineId;
+						previousDay = day;
+					}
+					else if (day.TimelineId == previousTimelineId)
+					{
+						currentSpanCount++;
+					}
+				}
+			</td>
+		</tr>
+	}
+</table>
+
+

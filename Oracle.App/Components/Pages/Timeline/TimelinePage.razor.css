@@ -1,0 +1,42 @@
+﻿.timeline-Container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.timeline-Item {
+    cursor: pointer;
+    padding: 8px;
+}
+
+.timeline-Item:hover {
+    border-color: black;
+}
+
+.timeline-Adventure {
+    background-color: aqua;
+    border: solid 2px aqua;
+    border-radius: 5px;
+}
+
+.timeline-Activity {
+    background-color: pink;
+    border: solid 2px pink;
+    border-radius: 5px;
+}
+
+.timeline-Status {
+    background-color: gray;
+    border: solid 1px gray;
+    border-radius: 5px;
+}
+
+.timeline-Nothing {
+    background-color: lightgray;
+    border: solid 2px lightgray;
+    border-radius: 5px;
+}
+
+.timeline-Span {
+    border-radius: 5px;
+}

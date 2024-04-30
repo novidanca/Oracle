@@ -38,7 +38,8 @@ public partial class AdventureDetailPage : OracleBasePage
 		if (outcome.Success)
 			await Refresh();
 
-		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Adventure started", outcome.Failure ? Severity.Error : Severity.Success);
+		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Adventure started",
+			outcome.Failure ? Severity.Error : Severity.Success);
 	}
 
 	private async Task EndAdventure()
@@ -55,11 +56,12 @@ public partial class AdventureDetailPage : OracleBasePage
 
 	private async Task AddCharacter()
 	{
-		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, 1);
+		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, 2);
 
 		if (outcome.Success)
 			await Refresh();
 
-		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Character added", outcome.Failure ? Severity.Error : Severity.Success);
+		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Character added",
+			outcome.Failure ? Severity.Error : Severity.Success);
 	}
 }
