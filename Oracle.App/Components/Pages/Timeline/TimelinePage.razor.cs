@@ -13,8 +13,10 @@ public partial class TimelinePage : OracleBasePage
 {
 	[Inject] private TimelineService TimelineService { get; set; } = null!;
 	[Inject] private CharacterService CharacterService { get; set; } = null!;
-	public List<TimelineDateVm> Timeline { get; set; } = new();
-	public List<int> TimelineDays => Timeline.Select(x => x.Date).Distinct().ToList();
+	public List<CharacterTimelineVm> Timeline { get; set; } = new();
+
+	public int StartDay { get; set; } = 0;
+	public int EndDay => StartDay + 30;
 
 	public List<Character> Characters { get; set; } = new();
 	public List<int> CharacterIds => Characters.Select(x => x.Id).ToList();
@@ -22,7 +24,8 @@ public partial class TimelinePage : OracleBasePage
 	protected override async Task Refresh()
 	{
 		Characters = await CharacterService.GetAllCharacters(new CharacterLoadOptions());
-		Timeline = await TimelineService.GetTimelineForManyCharacters(CharacterIds, 0, 30);
+		Timeline = await TimelineService.GetTimelineForManyCharacters(CharacterIds, StartDay, EndDay);
 		StateHasChanged();
+		Console.WriteLine("Ok");
 	}
 }

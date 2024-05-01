@@ -6,7 +6,10 @@
 
 .timeline-Item {
     cursor: pointer;
-    padding: 8px;
+    margin: 5px;
+    border: solid 2px lightgray;
+    border-radius: 5px;
+    width: 50px;
 }
 
 .timeline-Item:hover {

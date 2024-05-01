@@ -1,5 +1,11 @@
 ﻿namespace Oracle.Logic.Services.TimelineService;
 
+public class CharacterTimelineVm
+{
+	public int CharacterId { get; set; }
+	public List<TimelineDateVm> Timeline { get; set; } = [];
+}
+
 public class TimelineDateVm
 {
 	public int CharacterId { get; set; }

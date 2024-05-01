@@ -56,7 +56,7 @@ public partial class AdventureDetailPage : OracleBasePage
 
 	private async Task AddCharacter()
 	{
-		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, 2);
+		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, 3);
 
 		if (outcome.Success)
 			await Refresh();

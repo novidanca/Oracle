@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Oracle.Data\Oracle.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Development\" />
+  </ItemGroup>
+
 </Project>

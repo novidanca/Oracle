@@ -16,7 +16,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 	/// <summary>
 	/// Returns a list of Timeline events for a character that start within the given range
 	/// </summary>
-	public async Task<List<TimelineDateVm>> GetTimelineForCharacter(int characterId, int startDay, int endDay)
+	public async Task<List<CharacterTimelineVm>> GetTimelineForCharacter(int characterId, int startDay, int endDay)
 	{
 		var ids = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId
 		                                                 && x.StartDay >= startDay && x.StartDay <= endDay)
@@ -32,10 +32,10 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 	/// <summary>
 	/// Returns a list of Timeline events for many characters that start within the given range
 	/// </summary>
-	public async Task<List<TimelineDateVm>> GetTimelineForManyCharacters(List<int> characterIds, int startDay,
+	public async Task<List<CharacterTimelineVm>> GetTimelineForManyCharacters(List<int> characterIds, int startDay,
 		int endDay)
 	{
-		var ids = await Db.CharacterTimelines.Where(x => characterIds.Contains(x.Id)
+		var ids = await Db.CharacterTimelines.Where(x => characterIds.Contains(x.CharacterId)
 		                                                 && x.StartDay >= startDay && x.StartDay <= endDay)
 			.AsNoTracking()
 			.Select(x => x.Id).ToListAsync();
@@ -193,13 +193,21 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 	#endregion
 
-	public List<TimelineDateVm> AssembleTimelineVms(List<int> characterIds, List<CharacterTimeline> timelineData,
+	public static List<CharacterTimelineVm> AssembleTimelineVms(List<int> characterIds,
+		List<CharacterTimeline> timelineData,
 		int startDate, int endDate)
 	{
-		List<TimelineDateVm> timelineVms = new();
-
+		List<CharacterTimelineVm> characterTimelines = [];
 
 		foreach (var characterId in characterIds)
+		{
+			var characterTimeline = new CharacterTimelineVm()
+			{
+				CharacterId = characterId
+			};
+
+			List<TimelineDateVm> timeline = [];
+
 			for (var i = startDate; i <= endDate; i++)
 			{
 				var newVm = new TimelineDateVm()
@@ -236,9 +244,13 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 					}
 				}
 
-				timelineVms.Add(newVm);
+				timeline.Add(newVm);
 			}
 
-		return timelineVms;
+			characterTimeline.Timeline = timeline;
+			characterTimelines.Add(characterTimeline);
+		}
+
+		return characterTimelines;
 	}
 }
