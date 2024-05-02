@@ -1,4 +1,22 @@
 ﻿@page "/players"
+@using Oracle.Data.Models
 @inherits OracleBasePage
 
 <OracleTitle Title="Players" />
+
+<MudDataGrid Items="@Players">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" />
+        <TemplateColumn Title="Character Count">
+	        <CellTemplate>
+		        @{
+			        var player = context.Item;
+			        foreach (var character in player.Characters)
+			        {
+				        <span>@character.Name</span>
+			        }
+                }
+	        </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
