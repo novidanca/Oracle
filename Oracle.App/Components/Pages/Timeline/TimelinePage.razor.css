@@ -17,8 +17,8 @@
 }
 
 .timeline-Adventure {
-    background-color: aqua;
-    border: solid 2px aqua;
+    background-color: aqua !important;
+    border: solid 2px aqua !important;
     border-radius: 5px;
 }
 

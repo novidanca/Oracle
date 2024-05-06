@@ -5,16 +5,21 @@
 
 <OracleTitle Title="Timeline" />
 
-<MudPaper>
+
+<MudPaper Class="pa-5">
 	<table>
 		<tr>
 			<th class="me-3">Characters</th>
+			<th class="me-3 timeline-Item timeline-Nothing"> E </th>
 			<th class="timeline-Container">
-				@foreach (var day in Enumerable.Range(StartDay, EndDay+1))
-				{
-					<div class="timeline-Item timeline-Nothing" style="flex-grow: 1;">@day</div>
-				}
+					@foreach (var day in Enumerable.Range(StartDay, EndDay + 1))
+					{
+						<MudItem>
+							<MudPaper Height="20px" Width="20px">@day</MudPaper>
+						</MudItem>
+					}
 			</th>
+			<th class="me-3 timeline-Item timeline-Nothing"> L </th>
 		</tr>
 		
 		@foreach (var character in Characters)
@@ -27,8 +32,8 @@
 
 			<tr>
 				<td class="me-3">@character.Name</td>
+				<td class="me-3"></td>
 				<td class="timeline-Container">
-					<MudGrid>
 						@for (var i = StartDay; i <= EndDay + 1; i++)
 						{
 							var day = timeline.FirstOrDefault(x => x.Date == i);
@@ -55,15 +60,16 @@
 										};
 
 										var completionClass = currentDay.IsComplete ? "" : "incomplete";
+										var text = currentDay.Description;
+										var count = currentSpanCount;
 
-										 
-										@for (var x = 1; x <= currentSpanCount; x++)
-										{
-											<MudItem>
-												<MudPaper Height="20px" Width="10px">A</MudPaper>
-											</MudItem>
-										}
-										
+										<MudItem>
+											<MudPaper Height="40px" Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, count)">
+												<div class="align-center justify-start pa-2 timeline-Item @cssClass">
+													@text
+												</div>
+											</MudPaper>
+										</MudItem>
 
 										//<div class="timeline-Item timeline-Span @cssClass @completionClass" style="flex-grow: @currentSpanCount;">@currentDay?.Description</div>
 
@@ -86,14 +92,17 @@
 								currentDay = null;
 								currentTimelineId = null;
 								<MudItem>
-									<MudPaper Height="20px" Width="10px"></MudPaper>
+									<MudPaper Height="40px" Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1)">
+										<div class="align-center justify-start pa-2 timeline-Item timeline-Nothing">
+											
+										</div>
+									</MudPaper>
 								</MudItem>
 							}
 
 						}
-
-					</MudGrid>
 				</td>
+				<td class="me-3"></td>
 			</tr>
 		}
 	</table>

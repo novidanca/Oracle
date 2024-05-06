@@ -14,9 +14,10 @@ public partial class TimelinePage : OracleBasePage
 	[Inject] private TimelineService TimelineService { get; set; } = null!;
 	[Inject] private CharacterService CharacterService { get; set; } = null!;
 	public List<CharacterTimelineVm> Timeline { get; set; } = new();
+	public static int TimelineDayWidthPixels = 20;
 
 	public int StartDay { get; set; } = 0;
-	public int EndDay => StartDay + 30;
+	public int EndDay => StartDay + 19;
 
 	public List<Character> Characters { get; set; } = new();
 	public List<int> CharacterIds => Characters.Select(x => x.Id).ToList();
@@ -27,5 +28,11 @@ public partial class TimelinePage : OracleBasePage
 		Timeline = await TimelineService.GetTimelineForManyCharacters(CharacterIds, StartDay, EndDay);
 		StateHasChanged();
 		Console.WriteLine("Ok");
+	}
+
+	public static string GetTimelineDayPixelWidth(int timelineDayPixels, int numDays)
+	{
+		var numPixels = timelineDayPixels * numDays;
+		return $"{numPixels}px";
 	}
 }
