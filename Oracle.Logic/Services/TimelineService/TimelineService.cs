@@ -18,13 +18,11 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 	/// </summary>
 	public async Task<List<CharacterTimelineVm>> GetTimelineForCharacter(int characterId, int startDay, int endDay)
 	{
-		var ids = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId
-		                                                 && x.StartDay >= startDay && x.StartDay <= endDay)
-			.AsNoTracking()
-			.Select(x => x.Id).ToListAsync();
-
-		var timelineData = await GetTimeline(ids);
 		var characterIds = new List<int> { characterId };
+
+		var ids = await GetTimelineIds(characterIds, startDay, endDay);
+		var timelineData = await GetTimeline(ids);
+
 
 		return AssembleTimelineVms(characterIds, timelineData, startDay, endDay);
 	}
@@ -35,14 +33,30 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 	public async Task<List<CharacterTimelineVm>> GetTimelineForManyCharacters(List<int> characterIds, int startDay,
 		int endDay)
 	{
-		var ids = await Db.CharacterTimelines.Where(x => characterIds.Contains(x.CharacterId)
-		                                                 && x.StartDay >= startDay && x.StartDay <= endDay)
-			.AsNoTracking()
-			.Select(x => x.Id).ToListAsync();
+		var ids = await GetTimelineIds(characterIds, startDay, endDay);
 
 		var timelineData = await GetTimeline(ids);
 
 		return AssembleTimelineVms(characterIds, timelineData, startDay, endDay);
+	}
+
+	private async Task<List<int>> GetTimelineIds(List<int> characterIds, int startDay, int endDay)
+	{
+		return await Db.CharacterTimelines
+			.Where(x => characterIds.Contains(x.CharacterId) &&
+			            (
+				            // Timeline starts or ends within the specified range.
+				            (x.StartDay >= startDay && x.StartDay <= endDay) ||
+				            (x.EndDay >= startDay && x.EndDay <= endDay) ||
+				            // Timeline starts within the specified range and has no end day.
+				            (x.StartDay >= startDay && x.StartDay <= endDay && x.EndDay == null) ||
+				            // Timeline started before the end day and has no end day.
+				            (x.StartDay < endDay && x.EndDay == null)
+			            )
+			)
+			.AsNoTracking()
+			.Select(x => x.Id)
+			.ToListAsync();
 	}
 
 
@@ -133,7 +147,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 			AdventureId = adventure.Id,
 			CharacterId = characterId,
 			StartDay = adventure.StartDay,
-			EndDay = adventure.IsComplete ? adventure.StartDay + adventure.Duration : null
+			EndDay = adventure.IsComplete ? adventure.StartDay + (adventure.Duration - 1) : null
 		};
 
 		Db.CharacterTimelines.Add(timeline);
@@ -170,12 +184,21 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 		var characterAvailable = await IsCharacterAvailable(characterId, status.StartDay, status.EndDay);
 
+
+		// If the character is already doing something, end that thing
 		if (characterAvailable.Failure)
 		{
 			var blockingTimeline = await GetBlockingTimelineEvent(characterId, status.StartDay, status.EndDay);
-			// We have a blockingTimeline event. It's not null here.
 
-			if (blockingTimeline != null) blockingTimeline.EndDay = status.StartDay - 1;
+			if (blockingTimeline != null)
+			{
+				if (blockingTimeline.StartDay == blockingTimeline.EndDay)
+					// Remove one-day items from the timeline
+					Db.CharacterTimelines.Remove(blockingTimeline);
+				else
+					// End items longer than 1 day
+					blockingTimeline.EndDay = status.StartDay - 1;
+			}
 		}
 
 		var timeline = new CharacterTimeline()
@@ -208,40 +231,36 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 			List<TimelineDateVm> timeline = [];
 
-			for (var i = startDate; i <= endDate; i++)
+
+			var timelineEvents =
+				timelineData.Where(x => x.CharacterId == characterId).OrderBy(x => x.StartDay).ToList();
+
+
+			foreach (var timelineEvent in timelineEvents)
 			{
 				var newVm = new TimelineDateVm()
 				{
+					TimelineId = timelineEvent.Id,
 					CharacterId = characterId,
-					Date = i
+					StartDate = timelineEvent.StartDay,
+					EndDate = timelineEvent.EndDay
 				};
 
-				var timelineEvent = timelineData.FirstOrDefault(x => x.CharacterId == characterId
-				                                                     && i >= x.StartDay &&
-				                                                     (x.EndDay == null || i <= x.EndDay));
-
-				if (timelineEvent != null)
+				if (timelineEvent.Adventure != null)
 				{
-					newVm.TimelineId = timelineEvent.Id;
-
-					if (timelineEvent.Adventure != null)
-					{
-						newVm.Type = TimelineEntityTypes.Adventure;
-						newVm.Description = timelineEvent.Adventure.Name;
-						newVm.EntityLink = $"/adventureDetail/{timelineEvent.AdventureId}";
-						newVm.IsComplete = timelineEvent.Adventure.IsComplete;
-					}
-					else if (timelineEvent.Activity != null)
-					{
-						newVm.Type = TimelineEntityTypes.Activity;
-						newVm.Description = timelineEvent.Activity.ActivityType.Name;
-					}
-					else if (timelineEvent.Status != null)
-					{
-						newVm.Type = TimelineEntityTypes.BlockingStatus;
-						newVm.Description = timelineEvent.Status.Description;
-						newVm.IsComplete = timelineEvent.Status.EndDay.HasValue;
-					}
+					newVm.Type = TimelineEntityTypes.Adventure;
+					newVm.Description = timelineEvent.Adventure.Name;
+					newVm.EntityLink = $"/adventureDetail/{timelineEvent.AdventureId}";
+				}
+				else if (timelineEvent.Activity != null)
+				{
+					newVm.Type = TimelineEntityTypes.Activity;
+					newVm.Description = timelineEvent.Activity.ActivityType.Name;
+				}
+				else if (timelineEvent.Status != null)
+				{
+					newVm.Type = TimelineEntityTypes.BlockingStatus;
+					newVm.Description = timelineEvent.Status.Description;
 				}
 
 				timeline.Add(newVm);

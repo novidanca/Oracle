@@ -6,7 +6,7 @@
 
 .timeline-Item {
     cursor: pointer;
-    border: solid 2px lightgray;
+    border: solid 2px transparent;
     border-radius: 5px;
     height: 40px;
 }
@@ -31,6 +31,5 @@
 }
 
 .timeline-Nothing {
-    background-color: lightgray;
     border: solid 2px lightgray;
 }

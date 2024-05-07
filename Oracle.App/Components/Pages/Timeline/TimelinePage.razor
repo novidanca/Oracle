@@ -25,9 +25,7 @@
 		@foreach (var character in Characters)
 		{
 			var timeline = Timeline.First(x => x.CharacterId == character.Id).Timeline;
-			TimelineDateVm? currentDay = null;
-			int? currentTimelineId = null;
-			int currentSpanCount = 1;
+			TimelineDateVm? currentDayItem = null;
 
 
 			<tr>
@@ -36,22 +34,15 @@
 				<td class="timeline-Container">
 						@for (var i = StartDay; i <= EndDay; i++)
 						{
-							var day = timeline.FirstOrDefault(x => x.Date == i);
+							if (i == StartDay)
+							{
+								var previousDayItem = timeline.FirstOrDefault(x => x.StartDate <= i);
 
-							if (currentDay == null)
-							{
-								currentDay = day;
-								currentTimelineId = day?.TimelineId;
-							}
-							else
-							{
-								//We have a currentTimelineId chain going
-								if (currentTimelineId.HasValue)
-								{
-									//The chain is broken - add the item
-									if (day is not { TimelineId: not null } || (day.TimelineId.HasValue && day.TimelineId != currentTimelineId))
+									if (previousDayItem != null)
 									{
-										var cssClass = currentDay.Type switch
+										currentDayItem = previousDayItem;
+										//Render the thing
+										var cssClass = currentDayItem.Type switch
 										{
 											TimelineEntityTypes.Adventure => "timeline-Adventure",
 											TimelineEntityTypes.Activity => "timeline-Activity",
@@ -59,41 +50,71 @@
 											_ => "timeline-Nothing"
 										};
 
-										var completionClass = currentDay.IsComplete ? "" : "incomplete";
-										var text = currentDay.Description;
-										var count = currentSpanCount;
+										var completionClass = currentDayItem.IsComplete ? "" : "incomplete";
+										var text = currentDayItem.Description;
+										var duration = currentDayItem.EndDate == null
+													? GetCountOfIntegers(StartDay, EndDay)
+										: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
 
 										<div class=" @cssClass @completionClass timeline-Item pa-2"
-										 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, count, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
 											@text
 										</div>
-
-										//<div class="timeline-Item timeline-Span @cssClass @completionClass" style="flex-grow: @currentSpanCount;">@currentDay?.Description</div>
-
-										currentSpanCount = 1;
 									}
 									else
 									{
-										currentSpanCount++;
+										<div class="timeline-Item timeline-Nothing pa-2"
+											 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels); margin-right: @(TimelineDayMarginPixels)px;">
+											X
+										</div>
 									}
-								}
-							}
 
-							if (day is { TimelineId: not null })
-							{
-								currentDay = day;
-								currentTimelineId = day.TimelineId;
 							}
 							else
 							{
-								currentDay = null;
-								currentTimelineId = null;
+								var dayItem = timeline.FirstOrDefault(x => x.StartDate == i);
 
-							<div class="timeline-Item timeline-Nothing pa-2" style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels); margin-right: @(TimelineDayMarginPixels)px;">
-									
-								</div>
+								//Starting a new item
+								if (dayItem != null)
+								{
+									currentDayItem = dayItem;
+
+									//Render the thing
+									var cssClass = currentDayItem.Type switch
+									{
+										TimelineEntityTypes.Adventure => "timeline-Adventure",
+										TimelineEntityTypes.Activity => "timeline-Activity",
+										TimelineEntityTypes.BlockingStatus => "timeline-Status",
+										_ => "timeline-Nothing"
+									};
+
+									var completionClass = currentDayItem.IsComplete ? "" : "incomplete";
+									var text = currentDayItem.Description;
+									var duration = GetTimelineEventDuration(currentDayItem, EndDay);
+
+									<div class=" @cssClass @completionClass timeline-Item pa-2"
+									     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+										@text
+									</div>
+
+								}
+								// Check if the current thing has ended. If so, render a blank
+								else
+								{
+									if (currentDayItem != null && currentDayItem.EndDate < i)
+									{
+										currentDayItem = null;
+									}
+
+									if (currentDayItem == null)
+									{
+										<div class="timeline-Item timeline-Nothing pa-2" 
+										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels); margin-right: @(TimelineDayMarginPixels)px;">
+											X
+										</div>
+									}
+								}
 							}
-
 						}
 				</td>
 				<td class="me-3"></td>

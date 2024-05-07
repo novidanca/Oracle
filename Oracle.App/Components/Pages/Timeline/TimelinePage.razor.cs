@@ -18,7 +18,7 @@ public partial class TimelinePage : OracleBasePage
 	public static int TimelineDayMarginPixels = 3;
 
 	public int StartDay { get; set; } = 0;
-	public int EndDay => StartDay + 20;
+	public int EndDay => StartDay + 19;
 
 	public List<Character> Characters { get; set; } = new();
 	public List<int> CharacterIds => Characters.Select(x => x.Id).ToList();
@@ -47,5 +47,21 @@ public partial class TimelinePage : OracleBasePage
 		var numPixels = timelineDayPixels * numDays;
 		numPixels += numMarginPixels;
 		return $"{numPixels}px";
+	}
+
+	public static int GetTimelineEventDuration(TimelineDateVm timelineEvent, int endDay)
+	{
+		if (timelineEvent is { IsComplete: true, EndDate: not null } && timelineEvent.EndDate <= endDay)
+			return GetCountOfIntegers(timelineEvent.StartDate, timelineEvent.EndDate.Value);
+
+		return GetCountOfIntegers(timelineEvent.StartDate, endDay);
+	}
+
+	public static int GetCountOfIntegers(int start, int end)
+	{
+		var lowerBound = Math.Min(start, end);
+		var upperBound = Math.Max(start, end);
+
+		return upperBound - lowerBound + 1;
 	}
 }
