@@ -6,10 +6,9 @@
 
 .timeline-Item {
     cursor: pointer;
-    margin: 5px;
     border: solid 2px lightgray;
     border-radius: 5px;
-    width: 50px;
+    height: 40px;
 }
 
 .timeline-Item:hover {
@@ -17,29 +16,21 @@
 }
 
 .timeline-Adventure {
-    background-color: aqua !important;
-    border: solid 2px aqua !important;
-    border-radius: 5px;
+    background-color: aqua;
+    border: solid 2px aqua;
 }
 
 .timeline-Activity {
     background-color: pink;
     border: solid 2px pink;
-    border-radius: 5px;
 }
 
 .timeline-Status {
     background-color: gray;
-    border: solid 1px gray;
-    border-radius: 5px;
+    border: solid 2px gray;
 }
 
 .timeline-Nothing {
     background-color: lightgray;
     border: solid 2px lightgray;
-    border-radius: 5px;
-}
-
-.timeline-Span {
-    border-radius: 5px;
 }
