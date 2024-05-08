@@ -73,7 +73,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components\Pages\Timeline\Components\" />
       <Folder Include="Services\" />
     </ItemGroup>
 

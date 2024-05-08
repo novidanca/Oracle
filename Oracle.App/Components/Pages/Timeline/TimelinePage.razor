@@ -1,6 +1,7 @@
 ﻿@page "/timeline"
 @using System.Globalization
 @using Oracle.Logic.Services.TimelineService
+@using Oracle.App.Components.Pages.Timeline.Components
 @inherits OracleBasePage
 
 <OracleTitle Title="Timeline" />
@@ -63,10 +64,11 @@
 									}
 									else
 									{
-										<div class="timeline-Item timeline-Nothing pa-2"
-											 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels); margin-right: @(TimelineDayMarginPixels)px;">
-											X
+										<div class="timeline-Item timeline-Nothing pa-2" 
+										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+											<TimelineEmptyDay CharacterId="@character.Id" />
 										</div>
+										
 									}
 
 							}
@@ -108,9 +110,9 @@
 
 									if (currentDayItem == null)
 									{
-										<div class="timeline-Item timeline-Nothing pa-2" 
-										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels); margin-right: @(TimelineDayMarginPixels)px;">
-											X
+										<div class="timeline-Item timeline-Nothing pa-2"
+											 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+											<TimelineEmptyDay CharacterId="@character.Id" />
 										</div>
 									}
 								}
