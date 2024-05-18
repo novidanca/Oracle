@@ -19,4 +19,6 @@ public class Project
 
 	public int? OwningCharacterId { get; set; }
 	public Character? OwningCharacter { get; set; }
+
+	public ICollection<Activity> ContributingActivities { get; } = [];
 }

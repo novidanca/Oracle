@@ -73,7 +73,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Components\Pages\Activities\" />
+      <Folder Include="Components\Pages\Projects\" />
       <Folder Include="Services\" />
+      <Folder Include="wwwroot\js\" />
     </ItemGroup>
 
 </Project>

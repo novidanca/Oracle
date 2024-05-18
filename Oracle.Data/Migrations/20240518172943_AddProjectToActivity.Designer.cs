@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.Data;
 
@@ -10,9 +11,11 @@ using Oracle.Data;
 namespace Oracle.Data.Migrations
 {
     [DbContext(typeof(OracleDbContext))]
-    partial class OracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240518172943_AddProjectToActivity")]
+    partial class AddProjectToActivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -300,7 +303,7 @@ namespace Oracle.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Oracle.Data.Models.Project", "Project")
-                        .WithMany("ContributingActivities")
+                        .WithMany()
                         .HasForeignKey("ProjectId");
 
                     b.Navigation("ActivityType");
@@ -431,11 +434,6 @@ namespace Oracle.Data.Migrations
             modelBuilder.Entity("Oracle.Data.Models.Player", b =>
                 {
                     b.Navigation("Characters");
-                });
-
-            modelBuilder.Entity("Oracle.Data.Models.Project", b =>
-                {
-                    b.Navigation("ContributingActivities");
                 });
 #pragma warning restore 612, 618
         }

@@ -17,4 +17,7 @@ public class Activity
 	public Character Character { get; set; }
 
 	[Required] public int Date { get; set; }
+
+	public int? ProjectId { get; set; }
+	public Project? Project { get; set; }
 }

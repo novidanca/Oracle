@@ -272,4 +272,58 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 		return characterTimelines;
 	}
+
+	#region Removers
+
+	public async Task<IOutcome> RemoveFromCharacterTimeline(Activity activity, int characterId)
+	{
+		var timelineEntry =
+			await Db.CharacterTimelines.FirstOrDefaultAsync(x =>
+				x.ActivityId == activity.Id && x.CharacterId == characterId);
+
+		if (timelineEntry == null)
+			return Outcomes.Failure()
+				.WithMessage(
+					$"No matching timeline entry found for activity {activity.Id} and character {characterId}");
+
+		Db.CharacterTimelines.Remove(timelineEntry);
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
+	}
+
+	public async Task<IOutcome> RemoveFromCharacterTimeline(Adventure adventure, int characterId)
+	{
+		var timelineEntry =
+			await Db.CharacterTimelines.FirstOrDefaultAsync(x =>
+				x.AdventureId == adventure.Id && x.CharacterId == characterId);
+
+		if (timelineEntry == null)
+			return Outcomes.Failure()
+				.WithMessage(
+					$"No matching timeline entry found for adventure {adventure.Id} and character {characterId}");
+
+		Db.CharacterTimelines.Remove(timelineEntry);
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
+	}
+
+	public async Task<IOutcome> RemoveFromCharacterTimeline(CharacterStatus status, int characterId)
+	{
+		var timelineEntry =
+			await Db.CharacterTimelines.FirstOrDefaultAsync(x =>
+				x.CharacterStatusId == status.Id && x.CharacterId == characterId);
+
+		if (timelineEntry == null)
+			return Outcomes.Failure()
+				.WithMessage($"No matching timeline entry found for status {status.Id} and character {characterId}");
+
+		Db.CharacterTimelines.Remove(timelineEntry);
+		await Db.SaveChangesAsync();
+
+		return Outcomes.Success();
+	}
+
+	#endregion
 }

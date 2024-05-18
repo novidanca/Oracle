@@ -58,19 +58,27 @@
 										: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
 
 										<div class=" @cssClass @completionClass timeline-Item pa-2"
-										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
 											@text
 										</div>
 									}
 									else
 									{
-										<div class="timeline-Item timeline-Nothing pa-2" 
-										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
-											<TimelineEmptyDay CharacterId="@character.Id" />
-										</div>
-										
+										//Empty Cell Menu
+										var i1 = i;
+										<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+											<ActivatorContent>
+												<div class="timeline-Item timeline-Nothing pa-2" 
+												     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
+												</div>
+											</ActivatorContent>
+											<ChildContent>
+												<MudMenuItem OnClick="() => AddActivityButton_Clicked(i1, character.Id)">Add Activity</MudMenuItem>
+												<MudMenuItem>Add Adventure</MudMenuItem>
+												<MudMenuItem>Add Status</MudMenuItem>
+											</ChildContent>
+										</MudMenu>
 									}
-
 							}
 							else
 							{
@@ -95,7 +103,7 @@
 									var duration = GetTimelineEventDuration(currentDayItem, EndDay);
 
 									<div class=" @cssClass @completionClass timeline-Item pa-2"
-									     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
+									     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
 										@text
 									</div>
 
@@ -110,10 +118,20 @@
 
 									if (currentDayItem == null)
 									{
-										<div class="timeline-Item timeline-Nothing pa-2"
-											 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels);margin-right: @(TimelineDayMarginPixels)px;">
-											<TimelineEmptyDay CharacterId="@character.Id" />
-										</div>
+										//Empty Cell Menu
+										var i1 = i;
+										<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+											<ActivatorContent>
+												<div class="timeline-Item timeline-Nothing pa-2"
+													 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
+												</div>
+											</ActivatorContent>
+											<ChildContent>
+												<MudMenuItem OnClick="() => AddActivityButton_Clicked(i1, character.Id)">Add Activity</MudMenuItem>
+												<MudMenuItem>Add Adventure</MudMenuItem>
+												<MudMenuItem>Add Status</MudMenuItem>
+											</ChildContent>
+										</MudMenu>
 									}
 								}
 							}

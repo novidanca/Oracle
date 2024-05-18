@@ -1,6 +1,8 @@
 ﻿#region using
 
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
+using Oracle.App.Components.Pages.Timeline.Components;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 using Oracle.Logic.Services.TimelineService;
@@ -41,12 +43,12 @@ public partial class TimelinePage : OracleBasePage
 		await Refresh();
 	}
 
-	public static string GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)
+	public static int GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)
 	{
 		var numMarginPixels = numDays <= 1 ? 0 : timelineDayMarginPixels * (numDays - 1);
 		var numPixels = timelineDayPixels * numDays;
 		numPixels += numMarginPixels;
-		return $"{numPixels}px";
+		return numPixels;
 	}
 
 	public static int GetTimelineEventDuration(TimelineDateVm timelineEvent, int endDay)
@@ -64,4 +66,27 @@ public partial class TimelinePage : OracleBasePage
 
 		return upperBound - lowerBound + 1;
 	}
+
+
+	#region UI Events
+
+	private async Task AddActivityButton_Clicked(int date, int characterId)
+	{
+		var parameters = new DialogParameters
+		{
+			{ "CharacterId", characterId },
+			{ "Date", date }
+		};
+
+		var dialog = await DialogService.ShowAsync<NewActivityDialog>("Add new activity", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+		{
+			await Refresh();
+			Snackbar.Add("New activity added!", Severity.Success);
+		}
+	}
+
+	#endregion
 }
