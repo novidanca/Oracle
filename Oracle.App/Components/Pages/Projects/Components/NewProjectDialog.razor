@@ -1,0 +1,67 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Add new project
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Label="Project Name" Variant="Variant.Outlined" @bind-Value="ProjectName" />
+        <MudTextField Label="Goal" Variant="Variant.Outlined" @bind-Value="Goal" />
+        <MudSelect Label="Project Contribution Type" Variant="Variant.Outlined" @bind-Value="SelectedContributionType">
+            @foreach (var contributionType in ContributionTypes)
+            {
+                <MudSelectItem Value="@contributionType.Id">@contributionType.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect Label="Owning Character" Variant="Variant.Outlined" @bind-Value="SelectedCharacter">
+            <MudSelectItem Value="0">None</MudSelectItem>
+            @foreach (var character in Characters)
+            {
+                <MudSelectItem Value="@character.Id">@character.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="ProcessingNewProject" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewProject" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Inject] ProjectService ProjectService { get; set; } = null!;
+    [Parameter] public List<Character> Characters { get; set; } = new List<Character>();
+
+    private bool ProcessingNewProject { get; set; } = false;
+
+    // Project Fields
+    private string ProjectName { get; set; }
+    private int Goal { get; set; }
+    private int SelectedContributionType { get; set; }
+    private int SelectedCharacter { get; set; }
+
+    private List<ProjectContributionType> ContributionTypes { get; set; } = new List<ProjectContributionType>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get available project contribution types
+        ContributionTypes = await ProjectService.GetProjectContributionTypes();
+    }
+
+    private async Task Submit()
+    {
+        ProcessingNewProject = true;
+
+        // Try adding the new project
+        await ProjectService.AddProject(SelectedCharacter == 0 ? null : SelectedCharacter, ProjectName, Goal, SelectedContributionType);
+
+        MudDialog.Close(DialogResult.Ok("Project Added"));
+        
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

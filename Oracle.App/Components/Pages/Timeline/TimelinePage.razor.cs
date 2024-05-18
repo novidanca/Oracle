@@ -15,6 +15,7 @@ public partial class TimelinePage : OracleBasePage
 {
 	[Inject] private TimelineService TimelineService { get; set; } = null!;
 	[Inject] private CharacterService CharacterService { get; set; } = null!;
+	[Inject] private ActivityService ActivityService { get; set; } = null!;
 	public List<CharacterTimelineVm> Timeline { get; set; } = new();
 	public static int TimelineDayWidthPixels = 40;
 	public static int TimelineDayMarginPixels = 3;
@@ -67,15 +68,42 @@ public partial class TimelinePage : OracleBasePage
 		return upperBound - lowerBound + 1;
 	}
 
+	#region UiEvents
 
-	#region UI Events
-
-	private async Task OnMenuCommandClicked(string commandName, int date, int characterId)
+	private async Task OnMenuCommandClicked(string commandName, int date, int characterId, int? timelineId = null)
 	{
+		int? entityId = null;
+
+		if (timelineId != null)
+			entityId = await TimelineService.GetConnectedEntityId(timelineId.Value);
+
 		switch (commandName)
 		{
 			case "addActivity":
 				await AddActivityButton_Clicked(date, characterId);
+				break;
+			case "deleteActivity":
+				if (entityId != null)
+				{
+					await ActivityService.RemoveActivity(entityId.Value);
+					await Refresh();
+				}
+
+				break;
+			case "addToAdventure":
+				// Add your code here for the "addToAdventure" case
+				break;
+			case "addStatus":
+				// Add your code here for the "addStatus" case
+				break;
+			case "deleteStatus":
+				// Add your code here for the "deleteStatus" case
+				break;
+			case "editActivity":
+				// Add your code here for the "editActivity" case
+				break;
+			case "editStatus":
+				// Add your code here for the "editStatus" case
 				break;
 			default:
 				break;

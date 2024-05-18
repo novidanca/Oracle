@@ -47,13 +47,14 @@
 										: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
 										var i1 = i;
 
-										<TimelineDay
-											DayType="currentDayItem.Type"
-											Text="@currentDayItem.Description"
-											IsComplete="currentDayItem.IsComplete"
+										var item = currentDayItem;
+										<TimelineDay 
+											DayType="@item.Type"
+											Text="@item.Description"
+											IsComplete="@item.IsComplete"
 											Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
 											Margin="@TimelineDayMarginPixels"
-											OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
+											OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
 									}
 									else
 									{
@@ -76,13 +77,14 @@
 									var duration = GetTimelineEventDuration(currentDayItem, EndDay);
 									var i1 = i;
 
-									<TimelineDay
-										DayType="currentDayItem.Type"
-										Text="@currentDayItem.Description"
-										IsComplete="currentDayItem.IsComplete"
-										Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
-										Margin="@TimelineDayMarginPixels"
-										OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
+									var item = currentDayItem;
+										<TimelineDay 
+											DayType="@item.Type"
+											Text="@item.Description"
+											IsComplete="@item.IsComplete"
+											Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
+											Margin="@TimelineDayMarginPixels"
+											OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
 								}
 								// Check if the current thing has ended. If so, render a blank
 								else

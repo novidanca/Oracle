@@ -15,10 +15,11 @@
             }
         </MudSelect>
         <MudSelect Label="Project" Variant="Variant.Outlined" @bind-Value="SelectedProject">
-            @foreach (var project in Projects)
-            {
-                <MudSelectItem Value="@project.Id">@project.Name</MudSelectItem>
-            }
+	        <MudSelectItem Value="0">Does not contribute to project</MudSelectItem>
+	        @foreach (var project in Projects)
+	        {
+		        <MudSelectItem Value="@project.Id">@project.Name</MudSelectItem>
+	        }
         </MudSelect>
     </DialogContent>
     <DialogActions>
@@ -39,7 +40,7 @@
     
     // Activity Fields
     private int SelectedActivityType { get; set; }
-    private int? SelectedProject { get; set; } // Updated to allow null
+    private int SelectedProject { get; set; } // Updated to allow null
     
     private List<ActivityType> ActivityTypes { get; set; } = new List<ActivityType>();
     private List<Project> Projects { get; set; } = new List<Project>();
@@ -58,7 +59,7 @@
         ProcessingNewActivity = true;
         
         // Try adding the new activity
-        var outcome = await ActivityService.TryAddActivity(CharacterId, SelectedActivityType, Date, SelectedProject);
+        var outcome = await ActivityService.TryAddActivity(CharacterId, SelectedActivityType, Date, SelectedProject == 0 ? null : SelectedProject);
         
         if (outcome.Success)
         {

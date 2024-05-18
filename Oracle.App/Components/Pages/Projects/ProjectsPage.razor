@@ -1,0 +1,44 @@
+﻿@page "/projects"
+@using Oracle.Data.Models
+@inherits OracleBasePage
+
+<OracleTitle Title="Projects">
+    <CommandAreaContent>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Outlined"
+                   OnClick="NewProjectButton_Clicked">
+            Add New
+        </MudButton>
+    </CommandAreaContent>
+</OracleTitle>
+
+<div class="d-flex align-center mb-2">
+	<div class="me-auto">
+		<MudTextField T="string" DebounceInterval="300" OnDebounceIntervalElapsed="OnSearchQueryChanged" Label="Search..."/>
+	</div>
+	<div class="me-3">
+		<MudSelect Label="Character" Variant="Variant.Outlined" @bind-Value="SelectedCharacterId">
+			<MudSelectItem Value="0">All</MudSelectItem>
+			@foreach (var character in Characters)
+			{
+				<MudSelectItem Value="@character.Id">@character.Name</MudSelectItem>
+			}
+		</MudSelect>
+	</div>
+</div>
+
+<MudDataGrid Items="@(Projects)">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name"/>
+        <TemplateColumn Title="Owning Character">
+            <CellTemplate>
+                @{
+                    var project = context.Item;
+                    <div>@project.OwningCharacter?.Name</div>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.Goal" Title="Goal"/>
+        <PropertyColumn Property="x => x.IsComplete" Title="Is Complete"/>
+    </Columns>
+</MudDataGrid>

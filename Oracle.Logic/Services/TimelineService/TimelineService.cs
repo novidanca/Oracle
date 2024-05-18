@@ -87,6 +87,22 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 			.FirstAsync();
 	}
 
+	public async Task<int?> GetConnectedEntityId(int timelineId)
+	{
+		var timeline = await Db.CharacterTimelines.FindAsync(timelineId);
+
+		if (timeline != null)
+		{
+			if (timeline.AdventureId != null)
+				return timeline.AdventureId;
+			else if (timeline.ActivityId != null)
+				return timeline.ActivityId;
+			else if (timeline.CharacterStatusId != null) return timeline.CharacterStatusId;
+		}
+
+		return null;
+	}
+
 	#endregion
 
 	#region Checks

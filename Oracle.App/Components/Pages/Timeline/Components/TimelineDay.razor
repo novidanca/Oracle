@@ -10,9 +10,26 @@
 	    </div>
     </ActivatorContent>
     <ChildContent>
-        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</MudMenuItem>
-        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</MudMenuItem>
-        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</MudMenuItem>
+        @if (DayType == TimelineEntityTypes.None)
+        {
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</MudMenuItem>
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</MudMenuItem>
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</MudMenuItem>
+        }
+        @if (DayType == TimelineEntityTypes.Activity)
+        {
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+        }
+        @if (DayType == TimelineEntityTypes.Adventure)
+        {
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</MudMenuItem>
+        }
+        @if (DayType == TimelineEntityTypes.BlockingStatus)
+        {
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+	        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+        }
     </ChildContent>
 </MudMenu>
 
