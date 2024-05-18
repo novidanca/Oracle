@@ -70,6 +70,23 @@ public partial class TimelinePage : OracleBasePage
 
 	#region UI Events
 
+	private async Task OnMenuCommandClicked(string commandName, int date, int characterId)
+	{
+		switch (commandName)
+		{
+			case "addActivity":
+				await AddActivityButton_Clicked(date, characterId);
+				break;
+			default:
+				break;
+		}
+	}
+
+	#endregion
+
+
+	#region TimelineActions
+
 	private async Task AddActivityButton_Clicked(int date, int characterId)
 	{
 		var parameters = new DialogParameters

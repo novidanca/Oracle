@@ -4,32 +4,3 @@
     flex-wrap: nowrap;
 }
 
-.timeline-Item {
-    cursor: pointer;
-    border: solid 2px transparent;
-    border-radius: 5px;
-    height: 40px;
-}
-
-.timeline-Item:hover {
-    border-color: black;
-}
-
-.timeline-Adventure {
-    background-color: aqua;
-    border: solid 2px aqua;
-}
-
-.timeline-Activity {
-    background-color: pink;
-    border: solid 2px pink;
-}
-
-.timeline-Status {
-    background-color: gray;
-    border: solid 2px gray;
-}
-
-.timeline-Nothing {
-    border: solid 2px lightgray;
-}

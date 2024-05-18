@@ -42,42 +42,27 @@
 									if (previousDayItem != null)
 									{
 										currentDayItem = previousDayItem;
-										//Render the thing
-										var cssClass = currentDayItem.Type switch
-										{
-											TimelineEntityTypes.Adventure => "timeline-Adventure",
-											TimelineEntityTypes.Activity => "timeline-Activity",
-											TimelineEntityTypes.BlockingStatus => "timeline-Status",
-											_ => "timeline-Nothing"
-										};
-
-										var completionClass = currentDayItem.IsComplete ? "" : "incomplete";
-										var text = currentDayItem.Description;
 										var duration = currentDayItem.EndDate == null
 													? GetCountOfIntegers(StartDay, EndDay)
 										: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
+										var i1 = i;
 
-										<div class=" @cssClass @completionClass timeline-Item pa-2"
-										     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
-											@text
-										</div>
+										<TimelineDay
+											DayType="currentDayItem.Type"
+											Text="@currentDayItem.Description"
+											IsComplete="currentDayItem.IsComplete"
+											Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
+											Margin="@TimelineDayMarginPixels"
+											OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
 									}
 									else
 									{
 										//Empty Cell Menu
 										var i1 = i;
-										<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-											<ActivatorContent>
-												<div class="timeline-Item timeline-Nothing pa-2" 
-												     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
-												</div>
-											</ActivatorContent>
-											<ChildContent>
-												<MudMenuItem OnClick="() => AddActivityButton_Clicked(i1, character.Id)">Add Activity</MudMenuItem>
-												<MudMenuItem>Add Adventure</MudMenuItem>
-												<MudMenuItem>Add Status</MudMenuItem>
-											</ChildContent>
-										</MudMenu>
+										<TimelineDay 
+											Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)" 
+											Margin="@TimelineDayMarginPixels"
+											OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"/>
 									}
 							}
 							else
@@ -88,25 +73,16 @@
 								if (dayItem != null)
 								{
 									currentDayItem = dayItem;
-
-									//Render the thing
-									var cssClass = currentDayItem.Type switch
-									{
-										TimelineEntityTypes.Adventure => "timeline-Adventure",
-										TimelineEntityTypes.Activity => "timeline-Activity",
-										TimelineEntityTypes.BlockingStatus => "timeline-Status",
-										_ => "timeline-Nothing"
-									};
-
-									var completionClass = currentDayItem.IsComplete ? "" : "incomplete";
-									var text = currentDayItem.Description;
 									var duration = GetTimelineEventDuration(currentDayItem, EndDay);
+									var i1 = i;
 
-									<div class=" @cssClass @completionClass timeline-Item pa-2"
-									     style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
-										@text
-									</div>
-
+									<TimelineDay
+										DayType="currentDayItem.Type"
+										Text="@currentDayItem.Description"
+										IsComplete="currentDayItem.IsComplete"
+										Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
+										Margin="@TimelineDayMarginPixels"
+										OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
 								}
 								// Check if the current thing has ended. If so, render a blank
 								else
@@ -120,18 +96,9 @@
 									{
 										//Empty Cell Menu
 										var i1 = i;
-										<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-											<ActivatorContent>
-												<div class="timeline-Item timeline-Nothing pa-2"
-													 style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
-												</div>
-											</ActivatorContent>
-											<ChildContent>
-												<MudMenuItem OnClick="() => AddActivityButton_Clicked(i1, character.Id)">Add Activity</MudMenuItem>
-												<MudMenuItem>Add Adventure</MudMenuItem>
-												<MudMenuItem>Add Status</MudMenuItem>
-											</ChildContent>
-										</MudMenu>
+										<TimelineDay Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)"
+												  Margin="@TimelineDayMarginPixels"
+												  OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
 									}
 								}
 							}

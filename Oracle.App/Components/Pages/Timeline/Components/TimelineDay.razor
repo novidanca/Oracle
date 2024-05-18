@@ -1,0 +1,40 @@
+﻿@using Oracle.Logic.Services.TimelineService
+
+
+
+<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+    <ActivatorContent>
+	    <div class="timeline-Item @CssClass @(IsComplete ? "" : "incomplete") pa-2"
+	         style="width: @(Width)px; margin-right: @(Margin)px;">
+            @Text
+	    </div>
+    </ActivatorContent>
+    <ChildContent>
+        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</MudMenuItem>
+        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</MudMenuItem>
+        <MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</MudMenuItem>
+    </ChildContent>
+</MudMenu>
+
+
+
+@code
+{
+    [Parameter] public int Width { get; set; }
+    [Parameter] public int Margin { get; set; }
+    [Parameter] public TimelineEntityTypes DayType { get; set; } = TimelineEntityTypes.None;
+    [Parameter] public EventCallback<string> OnMenuItemClicked { get; set; }
+
+
+    [Parameter] public bool IsComplete { get; set; } = true;
+    [Parameter] public string? Text { get; set; }
+
+    public string CssClass => DayType switch
+    {
+	    TimelineEntityTypes.Adventure => "timeline-Adventure",
+	    TimelineEntityTypes.Activity => "timeline-Activity",
+	    TimelineEntityTypes.BlockingStatus => "timeline-Status",
+	    _ => "timeline-Nothing"
+    };
+
+}
