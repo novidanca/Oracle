@@ -232,6 +232,8 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 	#endregion
 
+	#region VM Assembly
+
 	public static List<CharacterTimelineVm> AssembleTimelineVms(List<int> characterIds,
 		List<CharacterTimeline> timelineData,
 		int startDate, int endDate)
@@ -289,6 +291,8 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		return characterTimelines;
 	}
 
+	#endregion
+
 	#region Removers
 
 	public async Task<IOutcome> RemoveFromCharacterTimeline(Activity activity, int characterId)
@@ -339,6 +343,25 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		await Db.SaveChangesAsync();
 
 		return Outcomes.Success();
+	}
+
+	#endregion
+
+	#region Helpers
+
+	public async Task<int> GetMaxTimelineDate()
+	{
+		var lastEndDate = await Db.CharacterTimelines
+			.Where(x => x.EndDay != null)
+			.OrderByDescending(x => x.EndDay)
+			.Select(x => x.EndDay)
+			.FirstOrDefaultAsync();
+
+		if (lastEndDate != null)
+			return lastEndDate.Value + 365;
+		else
+			// If there are no records with an EndDate, return the current day + 365
+			return 365;
 	}
 
 	#endregion

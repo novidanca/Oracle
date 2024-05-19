@@ -23,6 +23,7 @@ public partial class TimelinePage : OracleBasePage
 
 	public int StartDay { get; set; } = 0;
 	public int EndDay => StartDay + 19;
+	public int MaxEndDay { get; set; } = 365;
 
 	public List<Character> Characters { get; set; } = new();
 	public List<int> CharacterIds => Characters.Select(x => x.Id).ToList();
@@ -31,7 +32,17 @@ public partial class TimelinePage : OracleBasePage
 	{
 		Characters = await CharacterService.GetAllCharacters(new CharacterLoadOptions());
 		Timeline = await TimelineService.GetTimelineForManyCharacters(CharacterIds, StartDay, EndDay);
+		MaxEndDay = await TimelineService.GetMaxTimelineDate();
 		StateHasChanged();
+	}
+
+	#region DateAdjustment
+
+	private async Task OnStartDateChanged(int value)
+	{
+		var adjustment = value - StartDay;
+
+		await AdjustDateRange(adjustment);
 	}
 
 	private async Task AdjustDateRange(int adjustment)
@@ -44,6 +55,9 @@ public partial class TimelinePage : OracleBasePage
 		StartDay = resultingStartDay;
 		await Refresh();
 	}
+
+	#endregion
+
 
 	public static int GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)
 	{
