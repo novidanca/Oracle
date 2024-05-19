@@ -2,10 +2,11 @@
 
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Oracle.App.Components.Pages.Timeline.Components;
+using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 using Oracle.Logic.Services.TimelineService;
+using Color = MudBlazor.Color;
 
 #endregion
 
@@ -83,7 +84,8 @@ public partial class TimelinePage : OracleBasePage
 				await AddActivityButton_Clicked(date, characterId);
 				break;
 			case "deleteActivity":
-				if (entityId != null)
+				var confirmed = await Confirm("Delete Activity", "Really delete this activity?", "Delete", Color.Error);
+				if (confirmed && entityId != null)
 				{
 					await ActivityService.RemoveActivity(entityId.Value);
 					await Refresh();

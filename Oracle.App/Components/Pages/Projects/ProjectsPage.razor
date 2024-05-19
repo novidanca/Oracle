@@ -31,14 +31,27 @@
     <Columns>
         <PropertyColumn Property="x => x.Name" Title="Name"/>
         <TemplateColumn Title="Owning Character">
-            <CellTemplate>
-                @{
-                    var project = context.Item;
-                    <div>@project.OwningCharacter?.Name</div>
-                }
-            </CellTemplate>
+	        <CellTemplate>
+		        @{
+			        var project = context.Item;
+			        <div>@project.OwningCharacter?.Name</div>
+		        }
+	        </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.Goal" Title="Goal"/>
-        <PropertyColumn Property="x => x.IsComplete" Title="Is Complete"/>
+        <TemplateColumn Title="Progress">
+	        <CellTemplate>
+		        @{
+			        var project = context.Item;
+			        if (project.IsComplete)
+			        {
+				        <div>Complete</div>
+			        }
+			        else
+			        {
+				        <div>@project.Progress / @project.Goal @project.ProjectContributionType.Name</div>
+			        }
+		        }
+	        </CellTemplate>
+        </TemplateColumn>
     </Columns>
 </MudDataGrid>

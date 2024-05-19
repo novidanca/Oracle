@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using Oracle.App.Components.Pages.Characters.Components;
+using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 

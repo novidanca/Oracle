@@ -11,18 +11,22 @@
         <MudTextField Label="Project Name" Variant="Variant.Outlined" @bind-Value="ProjectName" />
         <MudTextField Label="Goal" Variant="Variant.Outlined" @bind-Value="Goal" />
         <MudSelect Label="Project Contribution Type" Variant="Variant.Outlined" @bind-Value="SelectedContributionType">
-            @foreach (var contributionType in ContributionTypes)
-            {
-                <MudSelectItem Value="@contributionType.Id">@contributionType.Name</MudSelectItem>
-            }
+	        @foreach (var contributionType in ContributionTypes)
+	        {
+		        <MudSelectItem Value="@contributionType.Id">@contributionType.Name</MudSelectItem>
+	        }
         </MudSelect>
-        <MudSelect Label="Owning Character" Variant="Variant.Outlined" @bind-Value="SelectedCharacter">
-            <MudSelectItem Value="0">None</MudSelectItem>
-            @foreach (var character in Characters)
-            {
-                <MudSelectItem Value="@character.Id">@character.Name</MudSelectItem>
-            }
-        </MudSelect>
+        
+        @if (Characters.Any())
+        {
+	        <MudSelect Label="Owning Character" Variant="Variant.Outlined" @bind-Value="SelectedCharacter">
+		        <MudSelectItem Value="0">None</MudSelectItem>
+		        @foreach (var character in Characters)
+		        {
+			        <MudSelectItem Value="@character.Id">@character.Name</MudSelectItem>
+		        }
+	        </MudSelect>
+        }
     </DialogContent>
     <DialogActions>
         <MudButton Disabled="ProcessingNewProject" OnClick="Cancel">Cancel</MudButton>
@@ -34,7 +38,10 @@
 {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Inject] ProjectService ProjectService { get; set; } = null!;
+
+    //Do one or the other. Don't pass in a character
     [Parameter] public List<Character> Characters { get; set; } = new List<Character>();
+    [Parameter] public int TargetCharacterId { get; set; } = 0;
 
     private bool ProcessingNewProject { get; set; } = false;
 
@@ -57,7 +64,9 @@
         ProcessingNewProject = true;
 
         // Try adding the new project
-        await ProjectService.AddProject(SelectedCharacter == 0 ? null : SelectedCharacter, ProjectName, Goal, SelectedContributionType);
+        await ProjectService.AddProject(SelectedCharacter == 0 
+	        ? TargetCharacterId != 0 ? TargetCharacterId : null 
+	        : SelectedCharacter, ProjectName, Goal, SelectedContributionType);
 
         MudDialog.Close(DialogResult.Ok("Project Added"));
         

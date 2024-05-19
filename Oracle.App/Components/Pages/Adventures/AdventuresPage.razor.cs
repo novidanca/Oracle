@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Oracle.App.Components.Pages.Adventures.Components;
+using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 

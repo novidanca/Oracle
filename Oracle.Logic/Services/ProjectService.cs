@@ -10,121 +10,151 @@ namespace Oracle.Logic.Services;
 
 public class ProjectService(OracleDbContext db) : ServiceBase(db)
 {
-    #region Adders
+	#region Adders
 
-    public async Task<Project> AddProject(int? characterId, string projectName, int goal, int projectContributionTypeId)
-    {
-        var project = new Project
-        {
-            ProjectContributionTypeId = projectContributionTypeId,
-            Name = projectName,
-            Goal = goal,
-            OwningCharacterId = characterId
-        };
+	public async Task<Project> AddProject(int? characterId, string projectName, int goal, int projectContributionTypeId)
+	{
+		var project = new Project
+		{
+			ProjectContributionTypeId = projectContributionTypeId,
+			Name = projectName,
+			Goal = goal,
+			OwningCharacterId = characterId
+		};
 
-        Db.Projects.Add(project);
-        await Db.SaveChangesAsync();
+		Db.Projects.Add(project);
+		await Db.SaveChangesAsync();
 
-        return await LoadProject(project.Id);
-    }
+		return await LoadProject(project.Id);
+	}
 
-    #endregion
+	#endregion
 
-    #region Getters
+	#region Getters
 
-    public async Task<List<Project>> GetActiveProjects(int characterId)
-    {
-        var activeProjectIds = await Db.Projects
-            .Where(p => p.OwningCharacterId == characterId &&
-                        p.Goal > p.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(x => x.Id)
-            .ToListAsync();
+	public async Task<List<Project>> GetActiveProjects(int characterId, int? contributionTypeId = null)
+	{
+		var query = Db.Projects
+			.Where(p => p.OwningCharacterId == characterId && !p.IsComplete);
 
-        return await LoadProjects(activeProjectIds);
-    }
+		if (contributionTypeId.HasValue)
+			query = query.Where(p => p.ProjectContributionTypeId == contributionTypeId.Value);
 
-    public async Task<List<Project>> GetActiveProjects()
-    {
-        var activeProjectIds = await Db.Projects
-            .Where(p => p.Goal > p.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(x => x.Id)
-            .ToListAsync();
+		var activeProjectIds = await query
+			.AsSplitQuery()
+			.AsNoTracking()
+			.Select(x => x.Id)
+			.ToListAsync();
 
-        return await LoadProjects(activeProjectIds);
-    }
+		return await LoadProjects(activeProjectIds);
+	}
 
-    public async Task<List<Project>> SearchProjects(string query, int? characterId = null)
-    {
-        var projectQuery = Db.Projects.AsQueryable();
+	public async Task<List<Project>> GetActiveProjects(int? contributionTypeId = null)
+	{
+		var query = Db.Projects
+			.Where(p => !p.IsComplete);
 
-        if (characterId.HasValue) projectQuery = projectQuery.Where(p => p.OwningCharacterId == characterId.Value);
+		if (contributionTypeId.HasValue)
+			query = query.Where(p => p.ProjectContributionTypeId == contributionTypeId.Value);
 
-        var projectIds = await projectQuery
-            .Where(p => p.Name.ToLower().Contains(query.ToLower()))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Select(x => x.Id)
-            .ToListAsync();
+		var activeProjectIds = await query
+			.AsSplitQuery()
+			.AsNoTracking()
+			.Select(x => x.Id)
+			.ToListAsync();
 
-        return await LoadProjects(projectIds);
-    }
+		return await LoadProjects(activeProjectIds);
+	}
 
-    public async Task<List<ProjectContributionType>> GetProjectContributionTypes()
-    {
-        return await Db.ProjectContributionTypes.ToListAsync();
-    }
+	public async Task<List<Project>> SearchProjects(string query, int? characterId = null)
+	{
+		var projectQuery = Db.Projects.AsQueryable();
 
-    #endregion
+		if (characterId.HasValue) projectQuery = projectQuery.Where(p => p.OwningCharacterId == characterId.Value);
 
-    #region Loaders
+		var projectIds = await projectQuery
+			.Where(p => p.Name.ToLower().Contains(query.ToLower()))
+			.AsSplitQuery()
+			.AsNoTracking()
+			.Select(x => x.Id)
+			.ToListAsync();
 
-    public async Task<Project> LoadProject(int projectId)
-    {
-        var project = await Db.Projects
-            .Include(p => p.ContributingActivities)
-            .ThenInclude(a => a.ActivityType)
-            .Include(x => x.OwningCharacter)
-            .Include(x => x.ProjectContributionType)
-            .FirstAsync(p => p.Id == projectId);
+		return await LoadProjects(projectIds);
+	}
 
-        if (project is { IsComplete: false } && project.ContributingActivities.Any())
-        {
-            var contributionAmount = project.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount);
-            if (contributionAmount >= project.Goal)
-            {
-                project.IsComplete = true;
-                await Db.SaveChangesAsync();
-            }
-        }
+	public async Task<List<ProjectContributionType>> GetProjectContributionTypes()
+	{
+		return await Db.ProjectContributionTypes.ToListAsync();
+	}
 
-        return project;
-    }
+	#endregion
 
-    public async Task<List<Project>> LoadProjects(List<int> projectIds)
-    {
-        var projects = await Db.Projects
-            .Include(p => p.ContributingActivities)
-            .ThenInclude(a => a.ActivityType)
-            .Include(x => x.OwningCharacter)
-            .Include(x => x.ProjectContributionType)
-            .Where(p => projectIds.Contains(p.Id))
-            .ToListAsync();
+	#region Loaders
 
-        foreach (var project in projects)
-            if (project is { IsComplete: false } && project.ContributingActivities.Any())
-            {
-                var contributionAmount =
-                    project.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount);
-                if (contributionAmount >= project.Goal) project.IsComplete = true;
-            }
+	public async Task<Project> LoadProject(int projectId)
+	{
+		var project = await Db.Projects
+			.Include(p => p.ContributingActivities)
+			.ThenInclude(a => a.ActivityType)
+			.Include(x => x.OwningCharacter)
+			.Include(x => x.ProjectContributionType)
+			.FirstAsync(p => p.Id == projectId);
 
-        await Db.SaveChangesAsync();
-        return projects;
-    }
+		if (project is { IsComplete: false } && project.ContributingActivities.Any())
+		{
+			var contributionAmount = project.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount);
+			project.Progress = contributionAmount;
+			project.IsComplete = contributionAmount >= project.Goal;
 
-    #endregion
+			await Db.SaveChangesAsync();
+		}
+
+		return project;
+	}
+
+	public async Task<List<Project>> LoadProjects(List<int> projectIds)
+	{
+		var projects = await Db.Projects
+			.Include(p => p.ContributingActivities)
+			.ThenInclude(a => a.ActivityType)
+			.Include(x => x.OwningCharacter)
+			.Include(x => x.ProjectContributionType)
+			.Where(p => projectIds.Contains(p.Id))
+			.ToListAsync();
+
+		foreach (var project in projects)
+			if (project is { IsComplete: false } && project.ContributingActivities.Any())
+			{
+				var contributionAmount =
+					project.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount);
+				project.Progress = contributionAmount;
+				project.IsComplete = contributionAmount >= project.Goal;
+			}
+
+		await Db.SaveChangesAsync();
+		return projects;
+	}
+
+	#endregion
+
+	#region Helpers
+
+	public async Task CheckAndUpdateProjectComplete(int projectId)
+	{
+		var project = await Db.Projects
+			.Include(p => p.ContributingActivities)
+			.ThenInclude(a => a.ActivityType)
+			.FirstOrDefaultAsync(p => p.Id == projectId);
+
+		if (project != null)
+		{
+			var contributionAmount = project.ContributingActivities.Sum(a => a.ActivityType.ProjectContributionAmount);
+			project.Progress = contributionAmount;
+			project.IsComplete = contributionAmount >= project.Goal;
+
+			await Db.SaveChangesAsync();
+		}
+	}
+
+	#endregion
 }

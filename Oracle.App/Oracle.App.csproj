@@ -74,6 +74,9 @@
 
     <ItemGroup>
       <Folder Include="Components\Pages\Activities\" />
+      <Folder Include="Components\Pages\Adventures\Components\" />
+      <Folder Include="Components\Pages\Characters\Components\" />
+      <Folder Include="Components\Pages\Projects\Components\" />
       <Folder Include="Services\" />
       <Folder Include="wwwroot\js\" />
     </ItemGroup>

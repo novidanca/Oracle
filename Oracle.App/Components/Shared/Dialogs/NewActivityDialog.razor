@@ -1,0 +1,117 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Add new activity
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudSelect T="int" Label="Activity Type" Variant="Variant.Outlined" ValueChanged="OnActivityTypeSelected">
+            @foreach (var activityType in ActivityTypes)
+            {
+                <MudSelectItem Value="@activityType.Id">@activityType.Name</MudSelectItem>
+            }
+        </MudSelect>
+	    <div class="d-flex align-center">
+		    <MudSelect Disabled="ProjectSelectDisabled" Label="Project" Variant="Variant.Outlined" @bind-Value="SelectedProject">
+			    <MudSelectItem Value="0">Does not contribute to project</MudSelectItem>
+			    @foreach (var project in Projects)
+			    {
+				    <MudSelectItem Value="@project.Id">@project.Name</MudSelectItem>
+			    }
+		    </MudSelect>
+            <MudButton OnClick="AddProject">Add</MudButton>
+	    </div>
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="ProcessingNewActivity" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewActivity" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	[Inject] ActivityService ActivityService { get; set; } = null!;
+	[Inject] ProjectService ProjectService { get; set; } = null!;
+	[Inject] protected IDialogService DialogService { get; set; }
+
+	[Parameter] public int CharacterId { get; set; }
+	[Parameter] public int Date { get; set; }
+
+	private bool ProcessingNewActivity { get; set; } = false;
+
+	// Activity Fields
+	private int SelectedActivityType { get; set; }
+	private int SelectedProject { get; set; }
+	private bool ProjectSelectDisabled { get; set; } = true;
+    
+    private List<ActivityType> ActivityTypes { get; set; } = new List<ActivityType>();
+    private List<Project> Projects { get; set; } = new List<Project>();
+    
+    protected override async Task OnInitializedAsync()
+    {
+	    await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+//      // Get available activity types
+	    ActivityTypes = await ActivityService.GetActivityTypes();
+
+	    SelectedProject = 0;
+	    ProjectSelectDisabled = true;
+    }
+
+    private async Task OnActivityTypeSelected(int value)
+    {
+	    SelectedActivityType = value;
+
+	    var activity = ActivityTypes.FirstOrDefault(x => x.Id == SelectedActivityType);
+
+	    if (activity == null)
+	    {
+		    SelectedProject = 0;
+		    ProjectSelectDisabled = true;
+		    return;
+	    }
+        
+	    Projects = await ProjectService.GetActiveProjects(CharacterId, activity.ProjectContributionTypeId);
+	    ProjectSelectDisabled = false;
+    }
+
+    private async Task AddProject()
+    {
+	    var parameters = new DialogParameters()
+	    {
+		    { "TargetCharacterId", CharacterId }
+	    };
+
+	    var dialog = await DialogService.ShowAsync<NewProjectDialog>("Add project", parameters);
+	    var result = await dialog.Result;
+
+	    if (!result.Canceled)
+	    {
+		    await OnInitializedAsync();
+	    }
+    }
+
+    private async Task Submit()
+    {
+        ProcessingNewActivity = true;
+        
+        // Try adding the new activity
+        var outcome = await ActivityService.TryAddActivity(CharacterId, SelectedActivityType, Date, SelectedProject == 0 ? null : SelectedProject);
+        
+        if (outcome.Success)
+        {
+            MudDialog.Close(DialogResult.Ok("Activity Added"));
+        }
+    }
+    
+    private void Cancel() => MudDialog.Cancel();
+
+}

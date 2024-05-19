@@ -3,7 +3,9 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Oracle.App.Components.Layout;
+using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data;
+using Color = MudBlazor.Color;
 
 #endregion
 
@@ -26,5 +28,22 @@ public partial class OracleBasePage : ComponentBase
 	protected virtual async Task Refresh()
 	{
 		return;
+	}
+
+	protected async Task<bool> Confirm(string title, string text, string buttonText = "Yes",
+		Color buttonColor = Color.Primary)
+	{
+		var parameters = new DialogParameters()
+		{
+			{ "Title", title },
+			{ "Text", text },
+			{ "ButtonText", buttonText },
+			{ "ButtonColor", buttonColor }
+		};
+
+		var dialog = await DialogService.ShowAsync<ConfirmDialog>(title, parameters);
+		var result = await dialog.Result;
+
+		return !result.Canceled;
 	}
 }
