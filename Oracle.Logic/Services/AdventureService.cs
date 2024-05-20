@@ -19,7 +19,7 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 			.Include(x => x.AdventureCharacters)
 			.ThenInclude(x => x.Character)
 			.AsSplitQuery()
-			.FirstOrDefaultAsync();
+			.FirstAsync();
 	}
 
 	public async Task<List<Adventure>> GetAdventures(List<int> adventureIds)
@@ -92,21 +92,36 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		// Start the adventure
 		adventure.IsStarted = true;
 		await Db.SaveChangesAsync();
-		
+
 		return Outcomes.Success();
 	}
 
 	#endregion
 
+
 	#region Modification
 
 	public async Task<bool> TryAddAdventureDay(int adventureId)
 	{
-		// Check adventure is started
+		// Check if the adventure is started and isn't fixed duration
+		var adventure = await GetAdventure(adventureId);
 
-		// Check characters are free on the new day. If so, add the day.
+		if (!adventure.IsStarted || adventure.HasFixedDuration)
+			return false;
 
-		return false;
+		// Check if characters are free on the new day. If so, add the day.
+		var newDay = adventure.StartDay + adventure.Duration;
+		foreach (var character in adventure.AdventureCharacters)
+		{
+			var isAvailable = await timelineService.IsCharacterAvailable(character.CharacterId, newDay);
+			if (!isAvailable.Success) return false;
+		}
+
+		// Add the new day to the adventure
+		adventure.Duration++;
+		await Db.SaveChangesAsync();
+
+		return true;
 	}
 
 
@@ -125,11 +140,11 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 
 		adventure.IsComplete = true;
 
-		var timelineItems = await Db.CharacterTimelines.Where(x => x.AdventureId == adventureId).ToListAsync();
-
-		foreach (var item in timelineItems)
+		if (!adventure.HasFixedDuration)
 		{
-			item.EndDay = adventure.StartDay + adventure.Duration;
+			var timelineItems = await Db.CharacterTimelines.Where(x => x.AdventureId == adventureId).ToListAsync();
+
+			foreach (var item in timelineItems) item.EndDay = adventure.StartDay + adventure.Duration - 1;
 		}
 
 		await Db.SaveChangesAsync();
@@ -137,20 +152,8 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		return Outcomes.Success();
 	}
 
-	#endregion
-
-
-	public async Task<int> GetMaxStartDay()
-	{
-		var adventures = await Db.Adventures.Select(x => x.StartDay).ToListAsync();
-
-		if (!adventures.Any())
-			return 0;
-
-		return adventures.Max();
-	}
-
-	public async Task<IOutcome<Adventure>> TryAddCharacterToAdventure(int adventureId, int characterId)
+	public async Task<IOutcome<Adventure>> TryAddCharacterToAdventure(int adventureId, int characterId,
+		int? manualStartDay = null)
 	{
 		// Get the adventure dates
 		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
@@ -163,7 +166,7 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 			return Outcomes.Failure<Adventure>().WithMessage($"Character {characterId} does not exist");
 
 		// Check the character is free within those dates
-		var timelineOutcome = await timelineService.AddToCharacterTimeline(adventure, characterId);
+		var timelineOutcome = await timelineService.AddToCharacterTimeline(adventure, characterId, manualStartDay);
 
 		if (timelineOutcome.Failure)
 			return Outcomes.Failure<Adventure>().WithMessagesFrom(timelineOutcome);
@@ -174,7 +177,7 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 			AdventureId = adventureId,
 			CharacterId = characterId
 		};
-		
+
 		Db.AdventureCharacters.Add(advChar);
 		await Db.SaveChangesAsync();
 
@@ -198,4 +201,21 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 
 		return true;
 	}
+
+	#endregion
+
+
+	#region Helpers
+
+	public async Task<int> GetMaxStartDay()
+	{
+		var adventures = await Db.Adventures.Select(x => x.StartDay).ToListAsync();
+
+		if (!adventures.Any())
+			return 0;
+
+		return adventures.Max();
+	}
+
+	#endregion
 }

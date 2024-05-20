@@ -17,5 +17,6 @@ public class Adventure
 	public int Duration { get; set; } = 1;
 	public bool IsStarted { get; set; }
 	public bool IsComplete { get; set; }
+	public bool HasFixedDuration { get; set; }
 	public ICollection<AdventureCharacter> AdventureCharacters { get; } = [];
 }

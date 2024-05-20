@@ -15,7 +15,8 @@ public class TimelineDateVm
 	public int? TimelineId { get; set; }
 	public string? Description { get; set; }
 	public string? EntityLink { get; set; }
-	public bool IsComplete => EndDate != null;
+	public bool HasEndDate => EndDate != null;
+	public bool IsComplete { get; set; } = true;
 }
 
 public enum TimelineEntityTypes

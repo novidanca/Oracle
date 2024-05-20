@@ -78,7 +78,7 @@ public partial class TimelinePage : OracleBasePage
 
 	public static int GetTimelineEventDuration(TimelineDateVm timelineEvent, int endDay)
 	{
-		if (timelineEvent is { IsComplete: true, EndDate: not null } && timelineEvent.EndDate <= endDay)
+		if (timelineEvent is { HasEndDate: true, EndDate: not null } && timelineEvent.EndDate <= endDay)
 			return GetCountOfIntegers(timelineEvent.StartDate, timelineEvent.EndDate.Value);
 
 		return GetCountOfIntegers(timelineEvent.StartDate, endDay);

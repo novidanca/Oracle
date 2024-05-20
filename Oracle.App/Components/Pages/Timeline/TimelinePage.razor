@@ -51,7 +51,7 @@
 								<TimelineDay
 									DayType="@item.Type"
 									Text="@item.Description"
-									IsComplete="@item.IsComplete"
+											 IsComplete="@item.IsComplete"
 									Width="@GetTimelineDayPixelWidth(TimelineDayWidthPixels, duration, TimelineDayMarginPixels)"
 									Margin="@TimelineDayMarginPixels"
 									OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)"/>

@@ -150,10 +150,13 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 	#region Adders
 
-	public async Task<IOutcome> AddToCharacterTimeline(Adventure adventure, int characterId)
+	/// <summary>
+	/// Add an adventure to a character's timeline. Optionally 
+	/// </summary>
+	public async Task<IOutcome> AddToCharacterTimeline(Adventure adventure, int characterId, int? manualStartDay = null)
 	{
 		var characterAvailable =
-			await IsCharacterAvailable(characterId, adventure.StartDay, adventure.StartDay + adventure.Duration);
+			await IsCharacterAvailable(characterId, adventure.StartDay, adventure.StartDay + adventure.Duration - 1);
 
 		if (characterAvailable.Failure)
 			return characterAvailable;
@@ -162,14 +165,28 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		{
 			AdventureId = adventure.Id,
 			CharacterId = characterId,
-			StartDay = adventure.StartDay,
-			EndDay = adventure.IsComplete ? adventure.StartDay + (adventure.Duration - 1) : null
+			StartDay = GetAdventureStartDay(adventure, manualStartDay),
+			EndDay = adventure.IsComplete || adventure.HasFixedDuration
+				? adventure.StartDay + (adventure.Duration - 1)
+				: null
 		};
 
 		Db.CharacterTimelines.Add(timeline);
 		await Db.SaveChangesAsync();
 
 		return Outcomes.Success();
+	}
+
+	public static int GetAdventureStartDay(Adventure adventure, int? manualStartDay)
+	{
+		if (manualStartDay == null) return adventure.StartDay;
+
+		var startDay = manualStartDay.Value;
+		var endDay = adventure.StartDay + adventure.Duration - 1;
+
+		if (startDay >= adventure.StartDay && startDay <= endDay) return startDay;
+
+		return adventure.StartDay;
 	}
 
 	public async Task<IOutcome> AddToCharacterTimeline(Activity activity, int characterId)
@@ -269,6 +286,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 					newVm.Type = TimelineEntityTypes.Adventure;
 					newVm.Description = timelineEvent.Adventure.Name;
 					newVm.EntityLink = $"/adventureDetail/{timelineEvent.AdventureId}";
+					newVm.IsComplete = timelineEvent.Adventure.IsComplete;
 				}
 				else if (timelineEvent.Activity != null)
 				{

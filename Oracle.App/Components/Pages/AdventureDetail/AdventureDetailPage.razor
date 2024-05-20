@@ -42,10 +42,12 @@
 						<div class="mb-2">
 							<MudNumericField @bind-Value="@Adventure.StartDay" Label="Start Day" Variant="Variant.Outlined" />
 						</div>
-						<div class="mb-2">
-							<MudNumericField @bind-Value="@Adventure.Duration" Label="Duration" Variant="Variant.Outlined" />
-						</div>
-						
+                        <div class="mb-2">
+                            <MudNumericField @bind-Value="@Adventure.Duration" Label="Duration" Variant="Variant.Outlined" Disabled="@Adventure.IsStarted" />
+                        </div>
+                        <div class="mb-2">
+                            <MudSwitch @bind-Value="@Adventure.HasFixedDuration" Label="Has Fixed Duration" Disabled="@Adventure.IsStarted" />
+                        </div>
 					</MudCardContent>
 				</MudCard>
 			</div>
