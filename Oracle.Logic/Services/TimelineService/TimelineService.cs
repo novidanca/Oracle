@@ -358,10 +358,9 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 			.FirstOrDefaultAsync();
 
 		if (lastEndDate != null)
-			return lastEndDate.Value + 365;
-		else
-			// If there are no records with an EndDate, return the current day + 365
-			return 365;
+			return lastEndDate.Value;
+
+		return 0;
 	}
 
 	#endregion

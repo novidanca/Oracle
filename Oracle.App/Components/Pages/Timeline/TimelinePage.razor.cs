@@ -28,11 +28,20 @@ public partial class TimelinePage : OracleBasePage
 	public List<Character> Characters { get; set; } = new();
 	public List<int> CharacterIds => Characters.Select(x => x.Id).ToList();
 
-	protected override async Task Refresh()
+	protected override async Task OnInitializedAsync()
 	{
 		Characters = await CharacterService.GetAllCharacters(new CharacterLoadOptions());
+
+		StartDay = await TimelineService.GetMaxTimelineDate();
+		MaxEndDay = StartDay + 365;
+
+		await Refresh();
+	}
+
+	protected override async Task Refresh()
+	{
 		Timeline = await TimelineService.GetTimelineForManyCharacters(CharacterIds, StartDay, EndDay);
-		MaxEndDay = await TimelineService.GetMaxTimelineDate();
+
 		StateHasChanged();
 	}
 
