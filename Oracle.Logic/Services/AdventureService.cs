@@ -193,9 +193,11 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		if (advChar == null)
 			return false;
 
-		// Remove adventure from CharacterTimeline
-
 		Db.AdventureCharacters.Remove(advChar);
+
+		// Remove adventure from CharacterTimeline
+		var adventure = await GetAdventure(adventureId);
+		await timelineService.RemoveFromCharacterTimeline(adventure, characterId);
 
 		await Db.SaveChangesAsync();
 

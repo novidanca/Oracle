@@ -11,9 +11,13 @@
 }
 
 .timeline-Item.incomplete {
-    background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%);
-    background-repeat: repeat;
-    background-position: right;
+        background: repeating-linear-gradient( 45deg, aqua, #06C3F9 10px);
+        font-weight: bold;
+        border: solid 2px #B8BFF4;
+}
+
+.timeline-Item.incomplete:hover {
+    border-color: black;
 }
 
 .timeline-Adventure {

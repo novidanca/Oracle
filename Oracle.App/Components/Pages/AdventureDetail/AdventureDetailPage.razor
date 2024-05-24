@@ -65,7 +65,17 @@
 						<MudList>
 							@foreach (var character in Adventure.AdventureCharacters)
 							{
-								<MudListItem>@character.Character.Name</MudListItem>
+								<MudListItem>
+									<div class="d-flex align-center">
+										<div class="me-auto">
+											@character.Character.Name
+										</div>
+										<div>
+											<MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" OnClick="() => RemoveCharacter(character.CharacterId)"></MudIconButton>
+										</div>
+									</div>
+									
+								</MudListItem>
 							}
 						</MudList>
 					</MudCardContent>

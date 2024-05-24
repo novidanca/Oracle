@@ -64,4 +64,15 @@ public partial class AdventureDetailPage : OracleBasePage
 		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Character added",
 			outcome.Failure ? Severity.Error : Severity.Success);
 	}
+
+	private async Task RemoveCharacter(int characterId)
+	{
+		var outcome = await AdventureService.RemoveCharacterFromAdventure(AdventureId, characterId);
+
+		if (outcome)
+			await Refresh();
+
+		Snackbar.Add(outcome ? "Character removed" : "Failed to remove character",
+			outcome ? Severity.Success : Severity.Error);
+	}
 }
