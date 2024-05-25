@@ -9,7 +9,8 @@ using Oracle.Data.Models;
 
 namespace Oracle.Logic.Services.TimelineService;
 
-public class TimelineService(OracleDbContext db) : ServiceBase(db)
+public class TimelineService(OracleDbContext db, TimelineAddService timelineAddService, StatusService statusService)
+	: ServiceBase(db)
 {
 	#region Getters
 
@@ -22,9 +23,10 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 		var ids = await GetTimelineIds(characterIds, startDay, endDay);
 		var timelineData = await GetTimeline(ids);
+		var statusData = await statusService.GetStatuses(characterId, startDay, endDay);
 
 
-		return AssembleTimelineVms(characterIds, timelineData, startDay, endDay);
+		return AssembleTimelineVms(characterIds, timelineData, statusData, startDay, endDay);
 	}
 
 	/// <summary>
@@ -36,8 +38,9 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		var ids = await GetTimelineIds(characterIds, startDay, endDay);
 
 		var timelineData = await GetTimeline(ids);
+		var statusData = await statusService.GetStatuses(characterIds, startDay, endDay);
 
-		return AssembleTimelineVms(characterIds, timelineData, startDay, endDay);
+		return AssembleTimelineVms(characterIds, timelineData, statusData, startDay, endDay);
 	}
 
 	private async Task<List<int>> GetTimelineIds(List<int> characterIds, int startDay, int endDay)
@@ -150,23 +153,6 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 						$"{character.Name} is occupied by {activityType} {description} that ends on or after this adventure's start day");
 	}
 
-	public async Task<CharacterTimeline?> GetBlockingTimelineEvent(int characterId, int startDay, int? endDay = null)
-	{
-		var characterAvailable = await IsCharacterAvailable(characterId, startDay, endDay);
-
-		if (characterAvailable.Success)
-			return null;
-
-		var timelineId = endDay.HasValue
-			? Db.CharacterTimelines.First(x => x.Id == characterId
-			                                   && x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay)).Id
-			: Db.CharacterTimelines.First(x => x.Id == characterId
-			                                   && startDay >= x.StartDay && (x.EndDay == null || startDay <= x.EndDay))
-				.Id;
-
-		return await GetTimeline(timelineId);
-	}
-
 	#endregion
 
 	#region Adders
@@ -183,32 +169,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 		if (characterAvailable.Failure)
 			return characterAvailable;
 
-		var timeline = new CharacterTimeline()
-		{
-			AdventureId = adventure.Id,
-			CharacterId = characterId,
-			StartDay = GetAdventureStartDay(adventure, manualStartDay),
-			EndDay = adventure.IsComplete || adventure.HasFixedDuration
-				? adventure.StartDay + (adventure.Duration - 1)
-				: null
-		};
-
-		Db.CharacterTimelines.Add(timeline);
-		await Db.SaveChangesAsync();
-
-		return Outcomes.Success();
-	}
-
-	public static int GetAdventureStartDay(Adventure adventure, int? manualStartDay)
-	{
-		if (manualStartDay == null) return adventure.StartDay;
-
-		var startDay = manualStartDay.Value;
-		var endDay = adventure.StartDay + adventure.Duration - 1;
-
-		if (startDay >= adventure.StartDay && startDay <= endDay) return startDay;
-
-		return adventure.StartDay;
+		return await timelineAddService.AddToCharacterTimeline(adventure, characterId, manualStartDay);
 	}
 
 	public async Task<IOutcome> AddToCharacterTimeline(Activity activity, int characterId)
@@ -217,56 +178,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 		if (characterAvailable.Failure)
 			return characterAvailable;
-
-		var timeline = new CharacterTimeline()
-		{
-			ActivityId = activity.Id,
-			CharacterId = characterId,
-			StartDay = activity.Date,
-			EndDay = activity.Date
-		};
-
-		Db.CharacterTimelines.Add(timeline);
-		await Db.SaveChangesAsync();
-
-		return Outcomes.Success();
-	}
-
-	public async Task<IOutcome> AddToCharacterTimeline(CharacterStatus status, int characterId)
-	{
-		if (status.CanQuest)
-			return Outcomes.Failure().WithMessage("Cannot add a non-blocking status to the timeline.");
-
-		var characterAvailable = await IsCharacterAvailable(characterId, status.StartDay, status.EndDay);
-
-
-		// If the character is already doing something, end that thing
-		if (characterAvailable.Failure)
-		{
-			var blockingTimeline = await GetBlockingTimelineEvent(characterId, status.StartDay, status.EndDay);
-
-			if (blockingTimeline != null)
-			{
-				if (blockingTimeline.StartDay == blockingTimeline.EndDay)
-					// Remove one-day items from the timeline
-					Db.CharacterTimelines.Remove(blockingTimeline);
-				else
-					// End items longer than 1 day
-					blockingTimeline.EndDay = status.StartDay - 1;
-			}
-		}
-
-		var timeline = new CharacterTimeline()
-		{
-			CharacterId = characterId,
-			StartDay = status.StartDay,
-			EndDay = status.EndDay
-		};
-
-		Db.CharacterTimelines.Add(timeline);
-		await Db.SaveChangesAsync();
-
-		return Outcomes.Success();
+		return await timelineAddService.AddToCharacterTimeline(activity, characterId);
 	}
 
 	#endregion
@@ -275,7 +187,7 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 
 	public static List<CharacterTimelineVm> AssembleTimelineVms(List<int> characterIds,
 		List<CharacterTimeline> timelineData,
-		int startDate, int endDate)
+		List<CharacterStatus> statusData, int startDate, int endDate)
 	{
 		List<CharacterTimelineVm> characterTimelines = [];
 
@@ -315,16 +227,24 @@ public class TimelineService(OracleDbContext db) : ServiceBase(db)
 					newVm.Type = TimelineEntityTypes.Activity;
 					newVm.Description = timelineEvent.Activity.ActivityType.Name;
 				}
-				else if (timelineEvent.Status != null)
-				{
-					newVm.Type = TimelineEntityTypes.BlockingStatus;
-					newVm.Description = timelineEvent.Status.Description;
-				}
 
 				timeline.Add(newVm);
 			}
 
 			characterTimeline.Timeline = timeline;
+			characterTimeline.Statuses = statusData
+				.Where(x => x.CharacterId == characterId)
+				.Select(x => new StatusVm()
+				{
+					StatusId = x.Id,
+					CharacterId = x.CharacterId,
+					Description = x.Description,
+					CanQuest = x.CanQuest,
+					StartDate = x.StartDay,
+					EndDate = x.EndDay
+				})
+				.ToList();
+
 			characterTimelines.Add(characterTimeline);
 		}
 

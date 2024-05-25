@@ -17,7 +17,4 @@ public class CharacterStatus
 
 	[Required] public int CharacterId { get; set; }
 	public Character Character { get; set; }
-
-	public int? ProjectId { get; set; }
-	public Project? Project { get; set; }
 }

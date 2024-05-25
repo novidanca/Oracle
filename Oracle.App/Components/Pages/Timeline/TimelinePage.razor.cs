@@ -94,12 +94,16 @@ public partial class TimelinePage : OracleBasePage
 
 	#region UiEvents
 
-	private async Task OnMenuCommandClicked(string commandName, int date, int characterId, int? timelineId = null)
+	private async Task OnMenuCommandClicked(string commandName, int date, int characterId, int? timelineId = null,
+		int? statusId = null)
 	{
 		int? entityId = null;
 
-		if (timelineId != null)
+		if (timelineId != null && statusId == null)
 			entityId = await TimelineService.GetConnectedEntityId(timelineId.Value);
+
+		if (timelineId == null && statusId != null)
+			entityId = statusId.Value;
 
 		switch (commandName)
 		{
@@ -119,7 +123,7 @@ public partial class TimelinePage : OracleBasePage
 				// Add your code here for the "addToAdventure" case
 				break;
 			case "addStatus":
-				// Add your code here for the "addStatus" case
+				await AddStatusButton_Clicked(date, characterId);
 				break;
 			case "deleteStatus":
 				// Add your code here for the "deleteStatus" case
@@ -155,6 +159,25 @@ public partial class TimelinePage : OracleBasePage
 		{
 			await Refresh();
 			Snackbar.Add("New activity added!", Severity.Success);
+		}
+	}
+
+	private async Task AddStatusButton_Clicked(int date, int characterId)
+	{
+		var parameters = new DialogParameters
+		{
+			{ "CharacterId", characterId },
+			{ "StartDate", date },
+			{ "EndDate", date + 7 }
+		};
+
+		var dialog = await DialogService.ShowAsync<NewStatusDialog>("Add new status", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+		{
+			await Refresh();
+			Snackbar.Add("New status added!", Severity.Success);
 		}
 	}
 

@@ -1,0 +1,58 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Add new status
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Label="Description" Variant="Variant.Outlined" @bind-Value="Description" />
+        <MudTextField Label="Start Day" Variant="Variant.Outlined" @bind-Value="StartDate" />
+        <MudCheckBox Label="Can Quest?" @bind-Value="CanQuest"></MudCheckBox>
+        <MudCheckBox Label="Set End Day?" @bind-Value="IsComplete"></MudCheckBox>
+        <MudTextField Label="End Day" Disabled="!IsComplete" Variant="Variant.Outlined" @bind-Value="EndDate" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="ProcessingNewStatus" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewStatus" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Inject] StatusService StatusService { get; set; } = null!;
+
+    [Parameter] public int CharacterId { get; set; }
+    [Parameter] public int StartDate { get; set; }
+    [Parameter] public int EndDate { get; set; }
+
+    private bool ProcessingNewStatus { get; set; } = false;
+    private bool CanQuest { get; set; }
+    private string Description { get; set; } = "Dead";
+    private bool IsComplete { get; set; } = false;
+
+
+    private async Task Submit()
+    {
+        ProcessingNewStatus = true;
+
+        var statusOptions = new CharacterStatusOptions(
+	        Description,
+	        StartDate,
+	        IsComplete ? EndDate : null,
+	        CanQuest);
+
+        // Try adding the new status
+        var outcome = await StatusService.AddStatus(CharacterId, statusOptions);
+
+        if (outcome.Success)
+        {
+            MudDialog.Close(DialogResult.Ok("Status Added"));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
