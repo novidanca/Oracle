@@ -2,7 +2,6 @@
     cursor: pointer;
     border: solid 2px transparent;
     border-radius: 5px;
-    height: 40px;
     position: relative;
 }
 
@@ -18,6 +17,31 @@
 
 .timeline-Item.incomplete:hover {
     border-color: black;
+}
+
+.timeline-Span {
+   
+}
+
+.timeline-Span-Menu-Item {
+    cursor: pointer;
+    height: 20px;
+}
+
+.timeline-Span-Background {
+    position: absolute;
+    inset: 0;
+}
+
+.timeline-Span-Foreground {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.timeline-Span-Foreground .timeline-Item {
+    flex: 0 0 auto; /* Prevent items from shrinking or growing */
 }
 
 .timeline-Adventure {

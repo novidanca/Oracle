@@ -1,0 +1,16 @@
+﻿.timeline-Container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.timeline-Item {
+    cursor: pointer;
+    border: solid 2px transparent;
+    border-radius: 5px;
+    height: 40px;
+}
+
+.timeline-Date {
+    font-size: 10px;
+}

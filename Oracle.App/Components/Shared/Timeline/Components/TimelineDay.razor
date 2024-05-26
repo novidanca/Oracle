@@ -1,0 +1,234 @@
+﻿@using Oracle.Logic.Services.TimelineService
+
+
+@*Single Day Item*@
+@if (Duration == 1)
+{
+	<MudMenu Class="top-level" ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+		<ActivatorContent>
+			<div class="timeline-Item @CssClass @(IsComplete ? "" : "incomplete") pa-2"
+				 style="width: @(DayWidthPixels)px; height: @(DayHeightPixels)px; margin-right: @(MarginPixels)px;">
+				@Text
+			</div>
+		</ActivatorContent>
+		<ChildContent>
+			@if (DayType == TimelineEntityTypes.None)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.Activity)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.Adventure)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.BlockingStatus)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+			}
+		</ChildContent>
+	</MudMenu>
+}
+@*Multi-Day Span*@
+else
+{	
+	<div class="timeline-Span dropdown-center"
+	     style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px;
+	            height: @(DayHeightPixels)px;">
+		<button class="@($"stop-prop-{Id}")"
+		        type="button"
+		        data-bs-toggle="dropdown"
+		        aria-expanded="false"
+		        style="width: 100%; height: 100%;">
+			<div class="timeline-Span-Background ms-2">
+				@Text
+			</div>
+			@*In-Span Day Menu (for adding statuses if necessary)*@
+			<div class="timeline-Span-Foreground">
+				@for (var i = 0; i < Duration; i++)
+				{
+					double marginRight = 0;
+					if (i != Duration)
+					{
+						marginRight = InnerSpanXMargin() + MarginPixels + BorderSize;
+					}
+
+					<div class="timeline-Item dropdown-center"
+					     style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(marginRight)px;">
+						<button class="@($"stop-prop-{Id}")" 
+						        type="button"
+						        data-bs-toggle="dropdown"
+						        aria-expanded="false"
+						        style="width: 100%; height: 100%;"></button>
+						<ul class="dropdown-menu">
+							<li>
+								<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</div></li>
+						</ul>
+					</div>
+				}
+			</div>
+		</button>
+		<ul class="dropdown-menu">
+			@if (DayType == TimelineEntityTypes.None)
+			{
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</div></li>
+			}
+			@if (DayType == TimelineEntityTypes.Activity)
+			{
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
+			}
+			@if (DayType == TimelineEntityTypes.Adventure)
+			{
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
+			}
+			@if (DayType == TimelineEntityTypes.BlockingStatus)
+			{
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
+				<li><div @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
+			}
+		</ul>
+	</div>
+
+
+
+
+	<MudMenu ActivationEvent="@MouseEvent.LeftClick" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+		<ActivatorContent>
+			<div class="timeline-Span timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
+			     style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px;
+			            height: @(DayHeightPixels)px;">
+				<div class="timeline-Span-Background ms-2">
+					@Text
+				</div>
+				@*In-Span Day Menu (for adding statuses if necessary)*@
+				<div class="timeline-Span-Foreground">
+					@for (var i = 0; i < Duration; i++)
+					{
+						double marginRight = 0;
+						if (i != Duration)
+						{
+							marginRight = InnerSpanXMargin() + MarginPixels + BorderSize;
+						}
+
+						<div class="timeline-Item dropdown-center"
+						     style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(marginRight)px;">
+							<button class="@($"stop-prop-{Id}")" 
+									type="button"
+							         data-bs-toggle="dropdown"
+							         aria-expanded="false"
+							         style="width: 100%; height: 100%;"></button>
+							<ul class="dropdown-menu">
+								<li>
+									<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</div></li>
+							</ul>
+						</div>
+					}
+				</div>
+			</div>
+		</ActivatorContent>
+		<ChildContent>
+			@if (DayType == TimelineEntityTypes.None)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.Activity)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.Adventure)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</MudMenuItem>
+			}
+			@if (DayType == TimelineEntityTypes.BlockingStatus)
+			{
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</MudMenuItem>
+				<MudMenuItem OnClick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</MudMenuItem>
+			}
+		</ChildContent>
+	</MudMenu>
+}
+
+
+@code
+{
+	[Inject] IJSRuntime JsRuntime { get; set; } = null!;
+
+	[Parameter] public int Duration { get; set; } = 1;
+	[Parameter] public int DayWidthPixels { get; set; }
+	[Parameter] public int DayHeightPixels { get; set; }
+	[Parameter] public int MarginPixels { get; set; }
+	[Parameter] public List<StatusVm> BlockingStatuses { get; set; } = [];
+	[Parameter] public TimelineEntityTypes DayType { get; set; } = TimelineEntityTypes.None;
+	[Parameter] public EventCallback<string> OnMenuItemClicked { get; set; }
+	[Parameter] public bool IsComplete { get; set; } = true;
+	[Parameter] public string? Text { get; set; }
+
+	private string Id { get; set; } = "";
+
+	private MudMenu? SpanMenu;
+	private static double InnerSpanMargin => 0.125;
+	private static double InnerSpanSize => 0.75;
+	private static double BorderSize => 2;
+
+	protected override void OnInitialized()
+	{
+		Id = Guid.NewGuid().ToString();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JsRuntime.InvokeVoidAsync("stopClickPropagation", $"stop-prop-{Id}");
+		}
+	}
+
+	private double InnerSpanWidth()
+	{
+		return DayWidthPixels * InnerSpanSize;
+	}
+
+	private double InnerSpanHeight()
+	{
+		return DayHeightPixels * InnerSpanSize;
+	}
+
+	private double InnerSpanYMargin()
+	{
+		return (DayHeightPixels * InnerSpanMargin)-(BorderSize/2);
+	}
+
+	private double InnerSpanXMargin()
+	{
+		return (DayWidthPixels * InnerSpanMargin) - (BorderSize / 2);
+	}
+
+
+    private string CssClass => DayType switch
+    {
+	    TimelineEntityTypes.Adventure => "timeline-Adventure",
+	    TimelineEntityTypes.Activity => "timeline-Activity",
+	    TimelineEntityTypes.BlockingStatus => "timeline-Status",
+	    _ => "timeline-Nothing"
+    };
+
+    private static int GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)
+    {
+	    var numMarginPixels = numDays <= 1 ? 0 : timelineDayMarginPixels * (numDays - 1);
+	    var numPixels = timelineDayPixels * numDays;
+	    numPixels += numMarginPixels;
+	    return numPixels;
+    }
+}

@@ -1,0 +1,143 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+@using Oracle.Logic.Services.TimelineService
+@using Oracle.App.Components.Shared.Timeline.Components
+
+
+
+
+<table>
+	<thead>
+		<tr>
+			<th class="me-5">Characters</th>
+			<th class="timeline-Container">
+				@foreach (var day in Enumerable.Range(StartDay, EndDay + 1 - StartDay))
+				{
+					<div class="timeline-Item timeline-Date pa-2" style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
+						@day
+					</div>
+				}
+			</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+		@foreach (var character in Characters)
+		{
+			var characterTimelineVm = CharacterTimelines.First(x => x.CharacterId == character.Id);
+			var timeline = characterTimelineVm.Timeline;
+			var statuses = characterTimelineVm.Statuses;
+			var blockingStatuses = statuses.Where(x => !x.CanQuest).ToList();
+
+			TimelineDateVm? currentDayItem = null;
+
+			<tr>
+				<td class="me-5">@character.Name</td>
+				<td class="timeline-Container" style="position: relative;">
+					@for (var i = StartDay; i <= EndDay; i++)
+					{
+						// Logic for the first day in the timeline, catches items that started previously but haven't finished yet
+						if (i == StartDay)
+						{
+							var previousDayItem = timeline.FirstOrDefault(x => x.StartDate <= i);
+							if (previousDayItem != null)
+							{
+								currentDayItem = previousDayItem;
+								var duration = currentDayItem.EndDate == null
+								? GetCountOfIntegers(StartDay, EndDay)
+								: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
+								var i1 = i;
+
+								var item = currentDayItem;
+								<TimelineDay DayType="@item.Type"
+											 Duration="@duration"
+											 Text="@item.Description"
+											 IsComplete="@item.IsComplete"
+											 DayWidthPixels="@TimelineDayWidthPixels"
+											 MarginPixels="@TimelineDayMarginPixels"
+											 DayHeightPixels="@TimelineDayHeightPixels"
+											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, timelineId: item.TimelineId)" />
+							}
+							else
+							{
+								//Empty Cell Menu
+								var i1 = i;
+								<TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
+								             DayHeightPixels="@TimelineDayHeightPixels"
+											 MarginPixels="@TimelineDayMarginPixels"
+											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
+							}
+						}
+						// Logic for each other day in the shown Timeline
+						else
+						{
+							// Get the day item for the current day
+							var dayItem = timeline.FirstOrDefault(x => x.StartDate == i);
+							//Starting a new item
+							if (dayItem != null)
+							{
+								currentDayItem = dayItem;
+								var duration = GetTimelineEventDuration(currentDayItem, EndDay);
+								var i1 = i;
+
+								var item = currentDayItem;
+								<TimelineDay DayType="@item.Type"
+											 Text="@item.Description"
+											 IsComplete="@item.IsComplete"
+											 Duration="@duration"
+											 DayWidthPixels="@TimelineDayWidthPixels"
+											 DayHeightPixels="@TimelineDayHeightPixels"
+											 MarginPixels="@TimelineDayMarginPixels"
+											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
+							}
+							// Check if the current day item has ended. If so, render a blank
+							else
+							{
+								if (currentDayItem != null && currentDayItem.EndDate < i)
+								{
+									currentDayItem = null;
+								}
+
+								if (currentDayItem == null)
+								{
+									//Empty Cell Menu
+									var i1 = i;
+									<TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
+									             DayHeightPixels="@TimelineDayHeightPixels"
+												 MarginPixels="@TimelineDayMarginPixels"
+												 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+												 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
+								}
+							}
+						}
+
+
+
+					}
+				</td>
+			</tr>
+		}
+
+	</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
