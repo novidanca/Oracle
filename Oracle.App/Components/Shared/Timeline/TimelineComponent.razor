@@ -1,6 +1,4 @@
-﻿@using Oracle.Data.Models
-@using Oracle.Logic.Services
-@using Oracle.Logic.Services.TimelineService
+﻿@using Oracle.Logic.Services.TimelineService
 @using Oracle.App.Components.Shared.Timeline.Components
 
 
@@ -10,7 +8,7 @@
 	<thead>
 		<tr>
 			<th class="me-5">Characters</th>
-			<th class="timeline-Container">
+			<th class="timeline-Container" style="position: relative;">
 				@foreach (var day in Enumerable.Range(StartDay, EndDay + 1 - StartDay))
 				{
 					<div class="timeline-Item timeline-Date pa-2" style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
@@ -44,20 +42,20 @@
 							{
 								currentDayItem = previousDayItem;
 								var duration = currentDayItem.EndDate == null
-								? GetCountOfIntegers(StartDay, EndDay)
-								: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
+									? GetCountOfIntegers(StartDay, EndDay)
+									: GetCountOfIntegers(StartDay, currentDayItem.EndDate.Value);
 								var i1 = i;
 
 								var item = currentDayItem;
 								<TimelineDay DayType="@item.Type"
-											 Duration="@duration"
-											 Text="@item.Description"
-											 IsComplete="@item.IsComplete"
-											 DayWidthPixels="@TimelineDayWidthPixels"
-											 MarginPixels="@TimelineDayMarginPixels"
-											 DayHeightPixels="@TimelineDayHeightPixels"
-											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
-											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, timelineId: item.TimelineId)" />
+								             Duration="@duration"
+								             Text="@item.Description"
+								             IsComplete="@item.IsComplete"
+								             DayWidthPixels="@TimelineDayWidthPixels"
+								             MarginPixels="@TimelineDayMarginPixels"
+								             DayHeightPixels="@TimelineDayHeightPixels"
+								             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, timelineId: item.TimelineId)" />
 							}
 							else
 							{
@@ -65,9 +63,9 @@
 								var i1 = i;
 								<TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
 								             DayHeightPixels="@TimelineDayHeightPixels"
-											 MarginPixels="@TimelineDayMarginPixels"
-											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
-											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
+								             MarginPixels="@TimelineDayMarginPixels"
+								             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
 							}
 						}
 						// Logic for each other day in the shown Timeline
@@ -84,14 +82,14 @@
 
 								var item = currentDayItem;
 								<TimelineDay DayType="@item.Type"
-											 Text="@item.Description"
-											 IsComplete="@item.IsComplete"
-											 Duration="@duration"
-											 DayWidthPixels="@TimelineDayWidthPixels"
-											 DayHeightPixels="@TimelineDayHeightPixels"
-											 MarginPixels="@TimelineDayMarginPixels"
-											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
-											 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
+								             Text="@item.Description"
+								             IsComplete="@item.IsComplete"
+								             Duration="@duration"
+								             DayWidthPixels="@TimelineDayWidthPixels"
+								             DayHeightPixels="@TimelineDayHeightPixels"
+								             MarginPixels="@TimelineDayMarginPixels"
+								             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
 							}
 							// Check if the current day item has ended. If so, render a blank
 							else
@@ -107,15 +105,42 @@
 									var i1 = i;
 									<TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
 									             DayHeightPixels="@TimelineDayHeightPixels"
-												 MarginPixels="@TimelineDayMarginPixels"
-												 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
-												 OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
+									             MarginPixels="@TimelineDayMarginPixels"
+									             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1)"
+									             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
 								}
 							}
 						}
+					}
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td class="timeline-Container" style="position: relative;">
+					@for (int i = StartDay; i <= EndDay; i++)
+					{
+						var dayStatuses = statuses.Where(x => x.CanQuest && x.StartDate <= i && (x.EndDate == null || x.EndDate >= i)).ToList();
+						var i1 = i;
 
-
-
+						<div class="d-flex flex-column">
+							@if (dayStatuses.Any())
+							{
+								foreach(var status in dayStatuses)
+								{
+									<TimelineStatus Status="@status"
+									                DayWidthPixels="@TimelineDayWidthPixels"
+									                MarginPixels="@TimelineDayMarginPixels"
+									                Day="@i1"/>
+								}
+							}
+							else
+							{
+								<TimelineStatus Status="null"
+								                DayWidthPixels="@TimelineDayWidthPixels"
+								                MarginPixels="@TimelineDayMarginPixels"
+								                Day="@i1"/>
+							}
+						</div>
 					}
 				</td>
 			</tr>
