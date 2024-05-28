@@ -26,9 +26,9 @@ public partial class TimelineComponent
 	[Parameter] [EditorRequired] public int EndDay { get; set; }
 	[Parameter] [EditorRequired] public EventCallback OnStateChanged { get; set; }
 
-	[Parameter] public int TimelineDayWidthPixels { get; set; } = 40;
-	[Parameter] public int TimelineDayHeightPixels { get; set; } = 40;
-	[Parameter] public int TimelineDayMarginPixels { get; set; } = 3;
+	[Parameter] public int TimelineDayWidthPixels { get; set; } = 50;
+	[Parameter] public int TimelineDayHeightPixels { get; set; } = 30;
+	[Parameter] public int TimelineDayMarginPixels { get; set; } = 1;
 
 	#region TimelineDisplayHelpers
 
