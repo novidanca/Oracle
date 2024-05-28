@@ -56,9 +56,9 @@ public partial class TimelineComponent
 		return GetCountOfIntegers(timelineEvent.StartDate, endDay);
 	}
 
-	public static List<StatusVm> GetOverlappingStatusVms(List<StatusVm> statusVms, int date)
+	public static List<StatusVm> GetOverlappingStatusVms(List<StatusVm> statusVms, int startDay, int endDay)
 	{
-		return statusVms.Where(s => s.StartDate <= date && s.EndDate >= date).ToList();
+		return statusVms.Where(s => s.StartDate <= endDay && s.EndDate >= startDay).ToList();
 	}
 
 	#endregion

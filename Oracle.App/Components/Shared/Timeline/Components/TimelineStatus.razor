@@ -4,7 +4,7 @@
 
 @if (Status != null)
 {
-	<div class="timeline-nonBlocking-Status" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Status.Description)"
+	<div class="timeline-nonBlocking-Status mb-1" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Status.Description)"
 	     title="@($"{Status.Description}-{Day}")">
 	</div>
 }
