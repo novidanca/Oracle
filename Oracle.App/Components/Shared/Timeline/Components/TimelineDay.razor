@@ -3,54 +3,79 @@
 @*Single Day*@
 @if (Duration == 1)
 {
-	<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
-		 style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px;
-	        height: @(DayHeightPixels)px;">
-		<button class="d-flex align-center"
-				type="button"
-				data-bs-toggle="dropdown"
-				aria-expanded="false"
-				style="width: 100%; height: 100%;">
-			<div class="timeline-Span-Background ms-2">
-				@Text
-			</div>
-			
-			@*Blocking Status Exist*@
-			@if (GetBlockingStatuses(StartDay).Any())
-			{
-				<div class="timeline-Span-Foreground">
-					<div class="timeline-Item timeline-Status"
-						 style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(InnerSpanXMargin())px;">
+	<MudTooltip Placement="Placement.Top">
+		<ChildContent>
+			<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
+				 style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px;
+				 height: @(DayHeightPixels)px;">
+				<button class="d-flex align-center justify-center"
+						type="button"
+						data-bs-toggle="dropdown"
+						aria-expanded="false"
+						style="width: 100%; height: 100%;">
+					<div class="timeline-Span-Background ms-2">
+						<MudIcon Icon="@Icon"></MudIcon>
 					</div>
-				</div>
-			}
-		</button>
-		<ul class="dropdown-menu">
-			@if (DayType == TimelineEntityTypes.None)
-			{
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
-			}
-			@if (DayType == TimelineEntityTypes.Activity)
-			{
-				<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
-			}
-			@if (DayType == TimelineEntityTypes.Adventure)
-			{
-				<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
-			}
-			@if (GetBlockingStatuses(StartDay).Any())
-			{
-				<li><hr class="dropdown-divider" /></li>
-				<li><h6 class="dropdown-header">Statuses: @GetBlockingStatusesDescription(StartDay)</h6></li>
-				<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageStatuses"))">Manage Statuses</div></li>
-			}
-			<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</div></li>
-		</ul>
-	</div>
+
+					@*Blocking Status Exist*@
+					@if (GetBlockingConditions(StartDay).Any())
+					{
+						<div class="timeline-Span-Foreground">
+							<div>
+								<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
+							</div>
+						</div>
+					}
+				</button>
+				<ul class="dropdown-menu">
+					@if (DayType == TimelineEntityTypes.None)
+					{
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
+					}
+					@if (DayType == TimelineEntityTypes.Activity)
+					{
+						<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
+					}
+					@if (DayType == TimelineEntityTypes.Adventure)
+					{
+						<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
+					}
+					@if (GetBlockingConditions(StartDay).Any())
+					{
+						<li><hr class="dropdown-divider" /></li>
+						<li><h6 class="dropdown-header">Conditions: @GetConditionDescriptions(StartDay)</h6></li>
+						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
+					}
+					<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
+					<li><hr class="dropdown-divider" /></li>
+					<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addNote"))">Add Note</div></li>
+				</ul>
+			</div>
+		</ChildContent>
+		<TooltipContent>
+			<div class="d-flex flex-column ma-1">
+				<div>Day @StartDay</div>
+
+				@if (DayType != TimelineEntityTypes.None)
+				{
+					<div class="mt-2">@Text</div>
+				}
+
+				@if (GetBlockingConditions(StartDay).Any())
+				{
+					<hr/>
+					<div>
+						@GetConditionDescriptions(StartDay)
+
+					</div>
+				}
+			</div>
+		</TooltipContent>
+	</MudTooltip>
 }
 @*Multi-Day*@
 else
@@ -65,48 +90,83 @@ else
 		<div class="timeline-Span-Foreground">
 			@for (var i = 0; i < Duration; i++)
 			{
-				var dayStatuses = GetBlockingStatuses(StartDay + i);
-				var statusDescription = GetBlockingStatusesDescription(StartDay + i);
+				var dayConditions = GetBlockingConditions(StartDay + i);
+				var conditionDescriptions = GetConditionDescriptions(StartDay + i);
 				double marginRight = 0;
 				if (i != Duration)
 				{
 					marginRight = InnerSpanXMargin() + MarginPixels + BorderSize;
 				}
 
-				<div class="timeline-Item dropdown-center @(dayStatuses.Any() ? "timeline-Status" : "")"
-				     style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(marginRight)px;">
-					<button type="button"
-					        data-bs-toggle="dropdown"
-					        aria-expanded="false"
-					        style="width: 100%; height: 100%;"></button>
-					
-					<ul class="dropdown-menu">
-						@if (DayType == TimelineEntityTypes.None)
-						{
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
-						}
-						@if (DayType == TimelineEntityTypes.Activity)
-						{
-							<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
-						}
-						@if (DayType == TimelineEntityTypes.Adventure)
-						{
-							<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
-						}
-						@if (dayStatuses.Any())
-						{
-							<li><hr class="dropdown-divider"/></li>
-							<li><h6 class="dropdown-header">Statuses: @statusDescription</h6></li>
-							<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageStatuses"))">Manage Statuses</div></li>
-						}
-						
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addStatus"))">Add Status</div></li>
-					</ul>
-				</div>
+				var i1 = i;
+				<MudTooltip Placement="Placement.Top">
+					<ChildContent>
+						<div class="timeline-Item dropdown-center"
+							 style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(marginRight)px;">
+							<button type="button"
+									data-bs-toggle="dropdown"
+									aria-expanded="false"
+									style="width: 100%; height: 100%;">
+								@if (dayConditions.Any())
+								{
+									<div class="timeline-Span-Foreground">
+										<div>
+											<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
+										</div>
+									</div>
+								}
+							</button>
+
+							<ul class="dropdown-menu">
+								@if (DayType == TimelineEntityTypes.None)
+								{
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
+								}
+								@if (DayType == TimelineEntityTypes.Activity)
+								{
+									<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
+								}
+								@if (DayType == TimelineEntityTypes.Adventure)
+								{
+									<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
+								}
+								@if (GetBlockingConditions(StartDay).Any())
+								{
+									<li><hr class="dropdown-divider" /></li>
+									<li><h6 class="dropdown-header">Conditions: @GetConditionDescriptions(StartDay+ i1)</h6></li>
+									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
+								}
+								<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
+
+								<li><hr class="dropdown-divider" /></li>
+								<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addNote"))">Add Note</div></li>
+							</ul>
+						</div>
+					</ChildContent>
+					<TooltipContent>
+						<div class="d-flex flex-column ma-1">
+							<div>Day @(StartDay + i1)</div>
+
+							@if (DayType != TimelineEntityTypes.None)
+							{
+								<div class="mt-2">@Text</div>
+							}
+
+							@if (GetBlockingConditions(StartDay + i1).Any())
+							{
+								<hr/>
+								<div>
+									@GetConditionDescriptions(StartDay + i1)
+
+								</div>
+							}
+						</div>
+					</TooltipContent>
+				</MudTooltip>
 			}
 		</div>
 	</div>
@@ -120,15 +180,15 @@ else
 	[Parameter] public int DayWidthPixels { get; set; }
 	[Parameter] public int DayHeightPixels { get; set; }
 	[Parameter] public int MarginPixels { get; set; }
-	[Parameter] public List<StatusVm> BlockingStatuses { get; set; } = [];
+	[Parameter] public List<ConditionVm> Conditions { get; set; } = [];
 	[Parameter] public TimelineEntityTypes DayType { get; set; } = TimelineEntityTypes.None;
 	[Parameter] public EventCallback<string> OnMenuItemClicked { get; set; }
 	[Parameter] public bool IsComplete { get; set; } = true;
 	[Parameter] public string? Text { get; set; }
 	[Parameter] public int StartDay { get; set; }
 
-	private static double InnerSpanMargin => 0.125;
-	private static double InnerSpanSize => 0.75;
+	private static double InnerSpanMargin => 0.1;
+	private static double InnerSpanSize => 0.80;
 	private static double BorderSize => 2;
 	
 	private double InnerSpanWidth()
@@ -151,14 +211,14 @@ else
 		return (DayWidthPixels * InnerSpanMargin) - (BorderSize / 2);
 	}
 
-	private List<StatusVm> GetBlockingStatuses(int day)
+	private List<ConditionVm> GetBlockingConditions(int day)
 	{
-		return BlockingStatuses.Where(x => x.StartDate <= day && (x.EndDate == null || x.EndDate >= day)).ToList();
+		return Conditions.Where(x => x.StartDate <= day && (x.EndDate == null || x.EndDate >= day)).ToList();
 	}
 
-	private string GetBlockingStatusesDescription(int day)
+	private string GetConditionDescriptions(int day)
 	{
-		var statuses = GetBlockingStatuses(day);
+		var statuses = GetBlockingConditions(day);
 		if (statuses.Any())
 		{
 			return string.Join(", ", statuses.Select(x => x.Description));
@@ -173,6 +233,13 @@ else
 	    TimelineEntityTypes.Activity => "timeline-Activity",
 	    TimelineEntityTypes.BlockingStatus => "timeline-Status",
 	    _ => "timeline-Nothing"
+    };
+
+    private string Icon => DayType switch
+    {
+	    TimelineEntityTypes.Adventure => "fa-regular fa-sword",
+	    TimelineEntityTypes.Activity => "fa-regular fa-screwdriver-wrench",
+	    _ => ""
     };
 
     private static int GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)

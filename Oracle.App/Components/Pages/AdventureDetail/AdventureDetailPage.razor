@@ -84,9 +84,36 @@
 		</MudItem>
 		<MudItem sm="12" md="7">
 			<MudPaper>
-				<div>
-					Something Else here?
+				<div class="d-flex align-center">
+					<div class="me-auto">
+						<MudText Typo="Typo.h6">Adventure Timeline</MudText>
+					</div>
+					<div>
+						<MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="AddDay"/>
+					</div>
 				</div>
+				@if (Adventure != null)
+				{
+					for (var i = Adventure.StartDay; i < Adventure.StartDay + Adventure.Duration; i++)
+					{
+						var i1 = i;
+						<MudCard>
+							<MudCardHeader>
+								<CardHeaderContent>
+									<MudText Typo="Typo.h6">Day @i1</MudText>
+								</CardHeaderContent>
+								<CardHeaderActions>
+									<MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
+								</CardHeaderActions>
+							</MudCardHeader>
+							<MudCardContent>
+								<div>
+									<MudText Typo="Typo.body1">What Happened on this day?</MudText>
+								</div>
+							</MudCardContent>
+						</MudCard>
+					}
+				}
 			</MudPaper>
 		</MudItem>
 	</MudGrid>

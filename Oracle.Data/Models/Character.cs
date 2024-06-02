@@ -16,6 +16,6 @@ public class Character
     public ICollection<Project> Projects { get; } = [];
     public ICollection<AdventureCharacter> AdventureCharacters { get; } = [];
     public ICollection<Activity> Activities { get; } = [];
-    public ICollection<CharacterStatus> Statuses { get; } = [];
+    public ICollection<CharacterCondition> Statuses { get; } = [];
     public ICollection<CharacterTimeline> Timeline { get; } = [];
 }

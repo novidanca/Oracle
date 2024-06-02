@@ -26,8 +26,8 @@ public partial class TimelineComponent
 	[Parameter] [EditorRequired] public int EndDay { get; set; }
 	[Parameter] [EditorRequired] public EventCallback OnStateChanged { get; set; }
 
-	[Parameter] public int TimelineDayWidthPixels { get; set; } = 50;
-	[Parameter] public int TimelineDayHeightPixels { get; set; } = 30;
+	[Parameter] public int TimelineDayWidthPixels { get; set; } = 36;
+	[Parameter] public int TimelineDayHeightPixels { get; set; } = 36;
 	[Parameter] public int TimelineDayMarginPixels { get; set; } = 1;
 
 	#region TimelineDisplayHelpers
@@ -56,9 +56,9 @@ public partial class TimelineComponent
 		return GetCountOfIntegers(timelineEvent.StartDate, endDay);
 	}
 
-	public static List<StatusVm> GetOverlappingStatusVms(List<StatusVm> statusVms, int startDay, int endDay)
+	public static List<ConditionVm> GetOverlappingConditions(List<ConditionVm> conditionsVms, int startDay, int endDay)
 	{
-		return statusVms.Where(s => s.StartDate <= endDay && s.EndDate >= startDay).ToList();
+		return conditionsVms.Where(s => s.StartDate <= endDay && (s.EndDate == null || s.EndDate >= startDay)).ToList();
 	}
 
 	#endregion
@@ -94,17 +94,20 @@ public partial class TimelineComponent
 			case "addToAdventure":
 				// Add your code here for the "addToAdventure" case
 				break;
-			case "addStatus":
-				await AddStatusButton_Clicked(date, characterId);
+			case "addCondition":
+				await AddConditionButton_Clicked(date, characterId);
 				break;
-			case "deleteStatus":
+			case "deleteCondition":
 				// Add your code here for the "deleteStatus" case
 				break;
 			case "editActivity":
 				// Add your code here for the "editActivity" case
 				break;
-			case "editStatus":
+			case "manageConditions":
 				// Add your code here for the "editStatus" case
+				break;
+			case "addNote":
+				await AddNoteButton_Clicked(date, characterId);
 				break;
 			default:
 				break;
@@ -134,7 +137,7 @@ public partial class TimelineComponent
 		}
 	}
 
-	private async Task AddStatusButton_Clicked(int date, int characterId)
+	private async Task AddConditionButton_Clicked(int date, int characterId)
 	{
 		var parameters = new DialogParameters
 		{
@@ -143,13 +146,33 @@ public partial class TimelineComponent
 			{ "EndDate", date + 7 }
 		};
 
-		var dialog = await DialogService.ShowAsync<NewStatusDialog>("Add new status", parameters);
+		var dialog = await DialogService.ShowAsync<NewConditionDialog>("Add new condition", parameters);
 		var result = await dialog.Result;
 
 		if (!result.Canceled)
 		{
 			await OnStateChanged.InvokeAsync();
-			Snackbar.Add("New status added!", Severity.Success);
+			Snackbar.Add("New condition added!", Severity.Success);
+		}
+	}
+
+
+	private async Task AddNoteButton_Clicked(int date, int characterId)
+	{
+		var parameters = new DialogParameters
+		{
+			{ "CharacterId", characterId },
+			{ "StartDate", date },
+			{ "EndDate", date + 7 }
+		};
+
+		var dialog = await DialogService.ShowAsync<NewTimelineNoteDialog>("Add new note", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+		{
+			await OnStateChanged.InvokeAsync();
+			Snackbar.Add("New note added!", Severity.Success);
 		}
 	}
 

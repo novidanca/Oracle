@@ -171,7 +171,7 @@ public partial class TimelinePage : OracleBasePage
 			{ "EndDate", date + 7 }
 		};
 
-		var dialog = await DialogService.ShowAsync<NewStatusDialog>("Add new status", parameters);
+		var dialog = await DialogService.ShowAsync<NewConditionDialog>("Add new status", parameters);
 		var result = await dialog.Result;
 
 		if (!result.Canceled)

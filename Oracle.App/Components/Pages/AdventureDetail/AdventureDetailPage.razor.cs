@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 
@@ -32,8 +33,11 @@ public partial class AdventureDetailPage : OracleBasePage
 
 	private async Task StartAdventure()
 	{
-		var testList = new List<int>();
-		var outcome = await AdventureService.TryStartAdventure(AdventureId, 1, testList);
+		if (Adventure == null)
+			return;
+
+		var characterIds = Adventure.AdventureCharacters.Select(x => x.CharacterId).ToList();
+		var outcome = await AdventureService.TryStartAdventure(AdventureId, characterIds);
 
 		if (outcome.Success)
 			await Refresh();
@@ -53,16 +57,36 @@ public partial class AdventureDetailPage : OracleBasePage
 			outcome.Failure ? Severity.Error : Severity.Success);
 	}
 
+	private async Task AddDay()
+	{
+		var outcome = await AdventureService.TryAddAdventureDay(AdventureId);
+
+		if (outcome)
+			await Refresh();
+
+		Snackbar.Add(outcome ? "Day added" : "Failed to add day", outcome ? Severity.Success : Severity.Error);
+	}
 
 	private async Task AddCharacter()
 	{
-		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, 4);
+		var parameters = new DialogParameters
+		{
+			{ "AdventureId", AdventureId },
+			{ "AdventureStarted", Adventure?.IsStarted }
+		};
 
-		if (outcome.Success)
+		var dialog = await DialogService.ShowAsync<AddCharacterToAdventureDialog>("Add new activity", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+		{
 			await Refresh();
-
-		Snackbar.Add(outcome.Failure ? outcome.ToString() : "Character added",
-			outcome.Failure ? Severity.Error : Severity.Success);
+			Snackbar.Add("Character added!", Severity.Success);
+		}
+		else
+		{
+			Snackbar.Add("Could not add character to adventure", Severity.Error);
+		}
 	}
 
 	private async Task RemoveCharacter(int characterId)

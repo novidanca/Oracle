@@ -4,7 +4,8 @@ public class CharacterTimelineVm
 {
 	public int CharacterId { get; set; }
 	public List<TimelineDateVm> Timeline { get; set; } = [];
-	public List<StatusVm> Statuses { get; set; } = [];
+	public List<ConditionVm> Conditions { get; set; } = [];
+	public List<NoteVm> Notes { get; set; } = [];
 }
 
 public class TimelineDateVm
@@ -28,12 +29,20 @@ public enum TimelineEntityTypes
 	BlockingStatus
 }
 
-public class StatusVm
+public class ConditionVm
 {
 	public int StatusId { get; set; }
 	public int CharacterId { get; set; }
 	public string Description { get; set; }
-	public bool CanQuest { get; set; }
+	public int StartDate { get; set; }
+	public int? EndDate { get; set; }
+}
+
+public class NoteVm
+{
+	public int NoteId { get; set; }
+	public int CharacterId { get; set; }
+	public string Note { get; set; }
 	public int StartDate { get; set; }
 	public int? EndDate { get; set; }
 }

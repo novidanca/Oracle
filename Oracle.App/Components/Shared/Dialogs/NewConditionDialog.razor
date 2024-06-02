@@ -4,32 +4,31 @@
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Add new status
+            Add new conditions
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField Label="Description" Variant="Variant.Outlined" @bind-Value="Description" />
         <MudTextField Label="Start Day" Variant="Variant.Outlined" @bind-Value="StartDate" />
-        <MudCheckBox Label="Can Quest?" @bind-Value="CanQuest"></MudCheckBox>
         <MudCheckBox Label="Set End Day?" @bind-Value="IsComplete"></MudCheckBox>
         <MudTextField Label="End Day" Disabled="!IsComplete" Variant="Variant.Outlined" @bind-Value="EndDate" />
     </DialogContent>
     <DialogActions>
-        <MudButton Disabled="ProcessingNewStatus" OnClick="Cancel">Cancel</MudButton>
-        <MudButton Disabled="ProcessingNewStatus" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        <MudButton Disabled="ProcessingNewCondition" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewCondition" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code
 {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Inject] StatusService StatusService { get; set; } = null!;
+    [Inject] ConditionService ConditionService { get; set; } = null!;
 
     [Parameter] public int CharacterId { get; set; }
     [Parameter] public int StartDate { get; set; }
     [Parameter] public int EndDate { get; set; }
 
-    private bool ProcessingNewStatus { get; set; } = false;
+    private bool ProcessingNewCondition { get; set; } = false;
     private bool CanQuest { get; set; }
     private string Description { get; set; } = "Dead";
     private bool IsComplete { get; set; } = false;
@@ -37,16 +36,15 @@
 
     private async Task Submit()
     {
-        ProcessingNewStatus = true;
+        ProcessingNewCondition = true;
 
-        var statusOptions = new CharacterStatusOptions(
+        var conditionOptions = new ConditionOptions(
 	        Description,
 	        StartDate,
-	        IsComplete ? EndDate : null,
-	        CanQuest);
+	        IsComplete ? EndDate : null);
 
         // Try adding the new status
-        var outcome = await StatusService.AddStatus(CharacterId, statusOptions);
+        var outcome = await ConditionService.AddCondition(CharacterId, conditionOptions);
 
         if (outcome.Success)
         {

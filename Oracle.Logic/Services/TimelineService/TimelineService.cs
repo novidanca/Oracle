@@ -9,7 +9,11 @@ using Oracle.Data.Models;
 
 namespace Oracle.Logic.Services.TimelineService;
 
-public class TimelineService(OracleDbContext db, TimelineAddService timelineAddService, StatusService statusService)
+public class TimelineService(
+	OracleDbContext db,
+	TimelineAddService timelineAddService,
+	ConditionService conditionService,
+	TimelineNotesService noteService)
 	: ServiceBase(db)
 {
 	#region Getters
@@ -20,13 +24,19 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 	public async Task<List<CharacterTimelineVm>> GetTimelineForCharacter(int characterId, int startDay, int endDay)
 	{
 		var characterIds = new List<int> { characterId };
-
 		var ids = await GetTimelineIds(characterIds, startDay, endDay);
-		var timelineData = await GetTimeline(ids);
-		var statusData = await statusService.GetStatuses(characterId, startDay, endDay);
 
+		var timelineDataTask = GetTimeline(ids);
+		var conditionDataTask = conditionService.GetConditions(characterIds, startDay, endDay, false);
+		var noteDataTask = noteService.GetTimelineNotes(characterIds, startDay, endDay, false);
 
-		return AssembleTimelineVms(characterIds, timelineData, statusData, startDay, endDay);
+		await Task.WhenAll(timelineDataTask, conditionDataTask, noteDataTask);
+
+		var timelineData = timelineDataTask.Result;
+		var conditionData = conditionDataTask.Result;
+		var noteData = noteDataTask.Result;
+
+		return AssembleTimelineVms(characterIds, timelineData, conditionData, noteData, startDay, endDay);
 	}
 
 	/// <summary>
@@ -37,10 +47,17 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 	{
 		var ids = await GetTimelineIds(characterIds, startDay, endDay);
 
-		var timelineData = await GetTimeline(ids);
-		var statusData = await statusService.GetStatuses(characterIds, startDay, endDay);
+		var timelineDataTask = GetTimeline(ids);
+		var conditionDataTask = conditionService.GetConditions(characterIds, startDay, endDay, false);
+		var noteDataTask = noteService.GetTimelineNotes(characterIds, startDay, endDay, false);
 
-		return AssembleTimelineVms(characterIds, timelineData, statusData, startDay, endDay);
+		await Task.WhenAll(timelineDataTask, conditionDataTask, noteDataTask);
+
+		var timelineData = timelineDataTask.Result;
+		var conditionData = conditionDataTask.Result;
+		var noteData = noteDataTask.Result;
+
+		return AssembleTimelineVms(characterIds, timelineData, conditionData, noteData, startDay, endDay);
 	}
 
 	private async Task<List<int>> GetTimelineIds(List<int> characterIds, int startDay, int endDay)
@@ -70,7 +87,6 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 			.Include(x => x.Adventure)
 			.Include(x => x.Activity)
 			.ThenInclude(x => x.ActivityType)
-			.Include(x => x.Status)
 			.AsSplitQuery()
 			.AsNoTracking()
 			.ToListAsync();
@@ -84,7 +100,6 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 			.Include(x => x.Adventure)
 			.Include(x => x.Activity)
 			.ThenInclude(x => x.ActivityType)
-			.Include(x => x.Status)
 			.AsSplitQuery()
 			.AsNoTracking()
 			.FirstAsync();
@@ -100,7 +115,6 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 				return timeline.AdventureId;
 			else if (timeline.ActivityId != null)
 				return timeline.ActivityId;
-			else if (timeline.CharacterStatusId != null) return timeline.CharacterStatusId;
 		}
 
 		return null;
@@ -112,45 +126,64 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 
 	public async Task<IOutcome> IsCharacterAvailable(int characterId, int startDay, int? endDay = null)
 	{
-		var character = Db.Characters.First(x => x.Id == characterId);
-		CharacterTimeline? blockingTimeline = null;
+		var character = await Db.Characters.FindAsync(characterId);
+		if (character == null) return Outcomes.Failure().WithMessage($"Character with ID {characterId} not found.");
+
+		var blockingCondition = await GetBlockingCondition(characterId, startDay, endDay);
+		if (blockingCondition != null) return GetBlockingConditionOutcome(character.Name, blockingCondition);
+
+		var blockingTimeline = await GetBlockingTimeline(characterId, startDay, endDay);
+		if (blockingTimeline != null) return GetBlockingTimelineOutcome(character.Name, blockingTimeline);
+
+		return Outcomes.Success();
+	}
+
+	private async Task<CharacterCondition?> GetBlockingCondition(int characterId, int startDay, int? endDay)
+	{
+		var query = Db.CharacterConditions.Where(x => x.CharacterId == characterId).AsNoTracking();
 
 		if (endDay.HasValue)
-		{
-			blockingTimeline = await Db.CharacterTimelines.Where(x => x.CharacterId == characterId)
-				.AsNoTracking()
-				.FirstOrDefaultAsync(x => x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
-		}
+			return await query.FirstOrDefaultAsync(x =>
+				x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
 		else
-		{
-			var query = Db.CharacterTimelines.Where(x => x.CharacterId == characterId).AsNoTracking();
+			return await query.FirstOrDefaultAsync(x => x.StartDay <= startDay && x.EndDay == null)
+			       ?? await query.FirstOrDefaultAsync(x =>
+				       x.EndDay != null && x.StartDay <= startDay && x.EndDay >= startDay);
+	}
 
-			// Check for any endless events, then any events that end on or after the proposed start day
-			blockingTimeline = await query.FirstOrDefaultAsync(x => x.EndDay == null)
-			                   ?? await query.FirstOrDefaultAsync(x => x.EndDay != null && x.EndDay >= startDay);
-		}
+	private async Task<CharacterTimeline?> GetBlockingTimeline(int characterId, int startDay, int? endDay)
+	{
+		var query = Db.CharacterTimelines.Where(x => x.CharacterId == characterId).AsNoTracking();
 
+		if (endDay.HasValue)
+			return await query.FirstOrDefaultAsync(x =>
+				x.StartDay <= endDay && (x.EndDay == null || x.EndDay >= startDay));
+		else
+			return await query.FirstOrDefaultAsync(x => x.StartDay <= startDay && x.EndDay == null)
+			       ?? await query.FirstOrDefaultAsync(x =>
+				       x.EndDay != null && x.StartDay <= startDay && x.EndDay >= startDay);
+	}
 
-		if (blockingTimeline == null)
-			return Outcomes.Success();
+	private IOutcome GetBlockingConditionOutcome(string characterName, CharacterCondition blockingCondition)
+	{
+		var description = blockingCondition.Description;
 
-		var blockingActivity = await GetTimeline(blockingTimeline.Id);
-		var activityType = blockingActivity.Adventure != null ? "adventure" :
-			blockingActivity.Activity != null ? "activity" :
-			blockingActivity.Status != null ? "status" :
-			"";
-		var description = blockingActivity.Adventure?.Name ?? blockingActivity.Activity?.ActivityType.Name ??
-			blockingActivity.Status?.Description ?? "";
+		return Outcomes.Failure()
+			.WithMessage(
+				$"{characterName} is blocked from activities by a condition: {description}.");
+	}
 
-		return endDay.HasValue
-			? Outcomes.Failure().WithMessage($"{character.Name} is not available on between {startDay} and {endDay}")
-			: blockingActivity.EndDay == null
-				? Outcomes.Failure()
-					.WithMessage(
-						$"{character.Name} cannot be added to an adventure with no Fixed Duration until until {activityType} {description} is complete")
-				: Outcomes.Failure()
-					.WithMessage(
-						$"{character.Name} is occupied by {activityType} {description} that ends on or after this adventure's start day");
+	private IOutcome GetBlockingTimelineOutcome(string characterName, CharacterTimeline blockingTimeline)
+	{
+		var itemType = blockingTimeline.Adventure != null ? "adventure" : "activity";
+
+		var description = blockingTimeline.Adventure != null
+			? blockingTimeline.Adventure.Name
+			: blockingTimeline.Activity?.ActivityType.Name;
+
+		return Outcomes.Failure()
+			.WithMessage(
+				$"{characterName} is occupied by {itemType} {description}.");
 	}
 
 	#endregion
@@ -163,8 +196,9 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 	public async Task<IOutcome> AddToCharacterTimeline(Adventure adventure, int characterId, int? manualStartDay = null)
 	{
 		var characterAvailable = adventure.HasFixedDuration
-			? await IsCharacterAvailable(characterId, adventure.StartDay, adventure.StartDay + adventure.Duration - 1)
-			: await IsCharacterAvailable(characterId, adventure.StartDay);
+			? await IsCharacterAvailable(characterId, manualStartDay ?? adventure.StartDay,
+				adventure.StartDay + adventure.Duration - 1)
+			: await IsCharacterAvailable(characterId, manualStartDay ?? adventure.StartDay);
 
 		if (characterAvailable.Failure)
 			return characterAvailable;
@@ -187,7 +221,7 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 
 	public static List<CharacterTimelineVm> AssembleTimelineVms(List<int> characterIds,
 		List<CharacterTimeline> timelineData,
-		List<CharacterStatus> statusData, int startDate, int endDate)
+		List<CharacterCondition> conditionData, List<TimelineNote> noteData, int startDate, int endDate)
 	{
 		List<CharacterTimelineVm> characterTimelines = [];
 
@@ -232,16 +266,27 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 			}
 
 			characterTimeline.Timeline = timeline;
-			characterTimeline.Statuses = statusData
+			characterTimeline.Conditions = conditionData
 				.Where(x => x.CharacterId == characterId)
-				.Select(x => new StatusVm()
+				.Select(x => new ConditionVm()
 				{
 					StatusId = x.Id,
 					CharacterId = x.CharacterId,
 					Description = x.Description,
-					CanQuest = x.CanQuest,
 					StartDate = x.StartDay,
 					EndDate = x.EndDay
+				})
+				.ToList();
+
+			characterTimeline.Notes = noteData
+				.Where(x => x.CharacterId != null && x.CharacterId == characterId)
+				.Select(x => new NoteVm()
+				{
+					NoteId = x.Id,
+					CharacterId = (int)x.CharacterId!,
+					Note = x.Note,
+					StartDate = x.StartDate,
+					EndDate = x.EndDate
 				})
 				.ToList();
 
@@ -282,22 +327,6 @@ public class TimelineService(OracleDbContext db, TimelineAddService timelineAddS
 			return Outcomes.Failure()
 				.WithMessage(
 					$"No matching timeline entry found for adventure {adventure.Id} and character {characterId}");
-
-		Db.CharacterTimelines.Remove(timelineEntry);
-		await Db.SaveChangesAsync();
-
-		return Outcomes.Success();
-	}
-
-	public async Task<IOutcome> RemoveFromCharacterTimeline(CharacterStatus status, int characterId)
-	{
-		var timelineEntry =
-			await Db.CharacterTimelines.FirstOrDefaultAsync(x =>
-				x.CharacterStatusId == status.Id && x.CharacterId == characterId);
-
-		if (timelineEntry == null)
-			return Outcomes.Failure()
-				.WithMessage($"No matching timeline entry found for status {status.Id} and character {characterId}");
 
 		Db.CharacterTimelines.Remove(timelineEntry);
 		await Db.SaveChangesAsync();

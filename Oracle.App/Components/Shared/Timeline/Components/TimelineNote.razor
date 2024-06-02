@@ -2,10 +2,10 @@
 @using System.Text
 @using Oracle.Logic.Services.TimelineService
 
-@if (Status != null)
+@if (Note != null)
 {
-	<div class="timeline-nonBlocking-Status mb-1" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Status.Description)"
-	     title="@($"{Status.Description}-{Day}")">
+	<div class="timeline-nonBlocking-Status mb-1" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Note.Note)"
+	     title="@($"{Note.Note}-{Day}")">
 	</div>
 }
 else
@@ -20,14 +20,14 @@ else
 	[Parameter][EditorRequired] public int DayWidthPixels { get; set; }
 	[Parameter][EditorRequired] public int MarginPixels { get; set; }
 	[Parameter][EditorRequired] public int Day { get; set; }
-	[Parameter] public StatusVm? Status { get; set; }
+	[Parameter] public NoteVm? Note { get; set; }
 	[Parameter] public EventCallback<string> OnStatusItemClicked { get; set; }
 
 	private int SpanWidth
 	{
 		get
 		{
-			if (Status is { EndDate: not null } && Status.EndDate == Day)
+			if (Note is { EndDate: not null } && Note.EndDate == Day)
 			{
 				return DayWidthPixels;
 			}
@@ -39,7 +39,7 @@ else
 	{
 		get
 		{
-			if (Status is { EndDate: not null } && Status.EndDate == Day)
+			if (Note is { EndDate: not null } && Note.EndDate == Day)
 			{
 				return MarginPixels;
 			}

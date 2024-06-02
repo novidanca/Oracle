@@ -74,7 +74,7 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		await Db.SaveChangesAsync();
 	}
 
-	public async Task<IOutcome> TryStartAdventure(int adventureId, int startDay, List<int> characterIds)
+	public async Task<IOutcome> TryStartAdventure(int adventureId, List<int> characterIds)
 	{
 		var adventure = await Db.Adventures.FirstOrDefaultAsync(x => x.Id == adventureId);
 
@@ -106,7 +106,7 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		// Check if the adventure is started and isn't fixed duration
 		var adventure = await GetAdventure(adventureId);
 
-		if (!adventure.IsStarted || adventure.HasFixedDuration)
+		if (!adventure.IsStarted)
 			return false;
 
 		// Check if characters are free on the new day. If so, add the day.
@@ -119,6 +119,14 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 
 		// Add the new day to the adventure
 		adventure.Duration++;
+
+		if (adventure.HasFixedDuration)
+		{
+			var timelineEvents = await Db.CharacterTimelines.Where(x => x.AdventureId == adventureId).ToListAsync();
+
+			foreach (var timelineEvent in timelineEvents) timelineEvent.EndDay = newDay;
+		}
+
 		await Db.SaveChangesAsync();
 
 		return true;
@@ -165,24 +173,43 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		if (character == null)
 			return Outcomes.Failure<Adventure>().WithMessage($"Character {characterId} does not exist");
 
-		// Check the character is free within those dates
-		var timelineOutcome = await timelineService.AddToCharacterTimeline(adventure, characterId, manualStartDay);
+		if (adventure.IsComplete)
+			return Outcomes.Failure<Adventure>().WithMessage("Adventure is already complete");
 
-		if (timelineOutcome.Failure)
-			return Outcomes.Failure<Adventure>().WithMessagesFrom(timelineOutcome);
 
-		// Connect the character and adventure
-		var advChar = new AdventureCharacter()
+		// We're just adding the character to a potential adventure, so we don't need to check if the adventure is started
+		if (!adventure.IsStarted)
 		{
-			AdventureId = adventureId,
-			CharacterId = characterId
-		};
+			// Connect the character and adventure
+			var advChar = new AdventureCharacter()
+			{
+				AdventureId = adventureId,
+				CharacterId = characterId
+			};
 
-		Db.AdventureCharacters.Add(advChar);
-		await Db.SaveChangesAsync();
+			Db.AdventureCharacters.Add(advChar);
+			await Db.SaveChangesAsync();
+		}
+		else
+		{
+			// Check the character is free within those dates
+			var timelineOutcome = await timelineService.AddToCharacterTimeline(adventure, characterId, manualStartDay);
+
+			if (timelineOutcome.Failure)
+				return Outcomes.Failure<Adventure>().WithMessagesFrom(timelineOutcome);
+
+			// Connect the character and adventure
+			var advChar = new AdventureCharacter()
+			{
+				AdventureId = adventureId,
+				CharacterId = characterId
+			};
+
+			Db.AdventureCharacters.Add(advChar);
+			await Db.SaveChangesAsync();
+		}
 
 		var updatedAdventure = await GetAdventure(adventureId);
-
 		return Outcomes.Success<Adventure>(updatedAdventure);
 	}
 

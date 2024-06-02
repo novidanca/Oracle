@@ -1,0 +1,96 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+@using Oracle.Logic.Services.TimelineService
+
+<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			Add character to adventure
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		
+		<MudSelect T="int" Label="Character" Variant="Variant.Outlined" @bind-Value="SelectedCharacter">
+			@foreach (var character in Characters)
+			{
+				<MudSelectItem Tag="@character.Message" Disabled="@(character.Message != "Available" && AdventureStarted)" Value="@character.CharacterId">@character.Name (@character.PlayerName)</MudSelectItem>
+			}
+		</MudSelect>
+
+	</DialogContent>
+	
+	<DialogActions>
+		<MudButton Disabled="ProcessingNewCharacter" OnClick="Cancel">Cancel</MudButton>
+		<MudButton Disabled="ProcessingNewCharacter" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+	</DialogActions>
+		
+	
+
+</MudDialog>
+
+@code {
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	[Inject] CharacterService CharacterService { get; set; } = null!;
+	[Inject] AdventureService AdventureService { get; set; } = null!;
+	[Inject] TimelineService TimelineService { get; set; } = null!;
+
+	[Parameter] public int AdventureId { get; set; }
+	[Parameter] public int? StartDay { get; set; }
+	[Parameter] public bool AdventureStarted { get; set; }
+
+	private List<CharacterVm> Characters { get; set; } = [];
+	public int SelectedCharacter { get; set; }
+	private bool ProcessingNewCharacter { get; set; } = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var options = new CharacterLoadOptions(false)
+		{
+			GetPlayer = true
+		};
+
+		var adventure = await AdventureService.GetAdventure(AdventureId);
+		var characters = await CharacterService.GetAllCharacters(options);
+		var charactersOnAdventure = adventure.AdventureCharacters.Select(x => x.CharacterId).ToList();
+
+		Characters = characters.Where(x => !charactersOnAdventure.Contains(x.Id)).Select(x => new CharacterVm
+		{
+			CharacterId = x.Id,
+			Name = x.Name,
+			PlayerName = x.Player?.Name ?? "NPC"
+		}).ToList();
+
+
+		var startDay = adventure.StartDay;
+		int? endDay = adventure.HasFixedDuration ? startDay + adventure.Duration : null;
+
+		foreach (var character in Characters)
+		{
+			var outcome = await TimelineService.IsCharacterAvailable(character.CharacterId, startDay, endDay);
+
+			character.Message = outcome.Success ? "Available" : outcome.ToString();
+		}
+	}
+
+
+	private async Task Submit()
+	{
+		ProcessingNewCharacter = true;
+
+		var outcome = await AdventureService.TryAddCharacterToAdventure(AdventureId, SelectedCharacter);
+
+		MudDialog.Close(outcome.Success ? DialogResult.Ok("Character added to adventure") : DialogResult.Cancel());
+	}
+    
+	private void Cancel() => MudDialog.Cancel();
+
+
+
+	private class CharacterVm
+	{
+		public int CharacterId { get; set; }
+		public string Name { get; set; }
+		public string PlayerName { get; set; }
+		public string Message { get; set; } = "";
+	}
+}

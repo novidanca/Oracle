@@ -6,12 +6,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Oracle.Data.Models;
 
-public class CharacterStatus
+public class CharacterCondition
 {
 	[Key] public int Id { get; set; }
 
 	[Required] public string Description { get; set; }
-	[Required] public bool CanQuest { get; set; }
 	[Required] public int StartDay { get; set; }
 	public int? EndDay { get; set; }
 

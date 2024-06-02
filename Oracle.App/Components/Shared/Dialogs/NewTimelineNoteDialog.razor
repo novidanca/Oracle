@@ -1,0 +1,56 @@
+﻿@using Oracle.Data.Models
+@using Oracle.Logic.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Add new timeline note
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Label="Note" Variant="Variant.Outlined" @bind-Value="Note" />
+        <MudTextField Label="Start Day" Variant="Variant.Outlined" @bind-Value="StartDate" />
+        <MudCheckBox Label="Set End Day?" @bind-Value="IsComplete"></MudCheckBox>
+        <MudTextField Label="End Day" Disabled="!IsComplete" Variant="Variant.Outlined" @bind-Value="EndDate" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="ProcessingNewNote" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewNote" Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Inject] TimelineNotesService TimelineNoteService { get; set; } = null!;
+
+    [Parameter] public int CharacterId { get; set; }
+    [Parameter] public int StartDate { get; set; }
+    [Parameter] public int EndDate { get; set; }
+
+    public string Note { get; set; } = "New Note";
+    private bool IsComplete { get; set; } = false;
+
+    private bool ProcessingNewNote { get; set; } = false;
+
+    private async Task Submit()
+    {
+        ProcessingNewNote = true;
+
+        var noteOptions = new NoteOptions(
+            Note,
+            StartDate,
+            IsComplete ? EndDate : null,
+            CharacterId);
+
+        // Try adding the new timeline note
+        var outcome = await TimelineNoteService.AddTimelineNote(noteOptions);
+
+        if (outcome.Success)
+        {
+            MudDialog.Close(DialogResult.Ok("Timeline Note Added"));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

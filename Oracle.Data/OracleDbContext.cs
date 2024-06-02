@@ -42,6 +42,7 @@ public partial class OracleDbContext(DbContextOptions<OracleDbContext> options, 
 	public virtual DbSet<AdventureCharacter> AdventureCharacters { get; set; }
 	public virtual DbSet<CampaignSettings> CampaignSettings { get; set; }
 	public virtual DbSet<Player> Players { get; set; }
-	public virtual DbSet<CharacterStatus> CharacterStatuses { get; set; }
+	public virtual DbSet<CharacterCondition> CharacterConditions { get; set; }
+	public virtual DbSet<TimelineNote> TimelineNotes { get; set; }
 	public virtual DbSet<CharacterTimeline> CharacterTimelines { get; set; }
 }

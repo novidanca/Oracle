@@ -23,7 +23,4 @@ public class CharacterTimeline
 
 	public int? ActivityId { get; set; }
 	public Activity? Activity { get; set; }
-
-	public int? CharacterStatusId { get; set; }
-	public CharacterStatus? Status { get; set; }
 }

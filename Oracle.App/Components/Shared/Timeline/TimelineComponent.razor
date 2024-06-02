@@ -24,8 +24,8 @@
 		{
 			var characterTimelineVm = CharacterTimelines.First(x => x.CharacterId == character.Id);
 			var timeline = characterTimelineVm.Timeline;
-			var statuses = characterTimelineVm.Statuses;
-			var blockingStatuses = statuses.Where(x => !x.CanQuest).ToList();
+			var notes = characterTimelineVm.Notes;
+			var conditions = characterTimelineVm.Conditions;
 
 			TimelineDateVm? currentDayItem = null;
 
@@ -54,7 +54,7 @@
 								             MarginPixels="@TimelineDayMarginPixels"
 								             DayHeightPixels="@TimelineDayHeightPixels"
 											 StartDay="@i1"
-								             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, StartDay, endDay)"
+								             Conditions="@GetOverlappingConditions(conditions, StartDay, endDay)"
 								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, timelineId: item.TimelineId)" />
 							}
 							else
@@ -65,7 +65,7 @@
 								             DayHeightPixels="@TimelineDayHeightPixels"
 								             MarginPixels="@TimelineDayMarginPixels"
 								             StartDay="@i1"
-											 BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, StartDay, StartDay)"
+											 Conditions="@GetOverlappingConditions(conditions, StartDay, StartDay)"
 								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
 							}
 						}
@@ -80,6 +80,7 @@
 								currentDayItem = dayItem;
 								var duration = GetTimelineEventDuration(currentDayItem, EndDay);
 								var i1 = i;
+								var conds = GetOverlappingConditions(conditions, i1, EndDay);
 
 								var item = currentDayItem;
 								<TimelineDay DayType="@item.Type"
@@ -90,7 +91,7 @@
 								             DayHeightPixels="@TimelineDayHeightPixels"
 								             MarginPixels="@TimelineDayMarginPixels"
 								             StartDay="@i1"
-								             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1, EndDay)"
+								             Conditions="@conds"
 								             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
 							}
 							// Check if the current day item has ended. If so, render a blank
@@ -109,7 +110,7 @@
 									             DayHeightPixels="@TimelineDayHeightPixels"
 									             MarginPixels="@TimelineDayMarginPixels"
 									             StartDay="@i1"
-									             BlockingStatuses="@GetOverlappingStatusVms(blockingStatuses, i1, i1)"
+									             Conditions="@GetOverlappingConditions(conditions, i1, i1)"
 									             OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
 								}
 							}
@@ -122,15 +123,15 @@
 				<td class="timeline-Container mt-1 mb-3" style="position: relative;">
 					@for (int i = StartDay; i <= EndDay; i++)
 					{
-						var dayStatuses = statuses.Where(x => x.CanQuest && x.StartDate <= i && (x.EndDate == null || x.EndDate >= i)).ToList();
+						var dayNotes = notes.Where(x => x.StartDate <= i && (x.EndDate == null || x.EndDate >= i)).ToList();
 						var i1 = i;
 
 						<div class="d-flex flex-column">
-							@if (dayStatuses.Any())
+							@if (dayNotes.Any())
 							{
-								foreach(var status in dayStatuses)
+								foreach(var note in dayNotes)
 								{
-									<TimelineStatus Status="@status"
+									<TimelineNote Note="@note"
 									                DayWidthPixels="@TimelineDayWidthPixels"
 									                MarginPixels="@TimelineDayMarginPixels"
 									                Day="@i1"/>
@@ -138,7 +139,7 @@
 							}
 							else
 							{
-								<TimelineStatus Status="null"
+								<TimelineNote Note="null"
 								                DayWidthPixels="@TimelineDayWidthPixels"
 								                MarginPixels="@TimelineDayMarginPixels"
 								                Day="@i1"/>
