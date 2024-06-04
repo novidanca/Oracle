@@ -1,3 +1,8 @@
-﻿.timeline-nonBlocking-Status {
-    height: 5px;
+﻿.timeline-note {
+    height: 10px;
+    border: 2px solid transparent;
+}
+
+.timeline-note:hover {
+    border-color: black;
 }

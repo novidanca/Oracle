@@ -13,14 +13,14 @@
 						data-bs-toggle="dropdown"
 						aria-expanded="false"
 						style="width: 100%; height: 100%;">
-					<div class="timeline-Span-Background ms-2">
+					<div class="timeline-Span-Background ms-2" style="z-index: @GetBackgroundZIndex()">
 						<MudIcon Icon="@Icon"></MudIcon>
 					</div>
 
 					@*Blocking Status Exist*@
 					@if (GetBlockingConditions(StartDay).Any())
 					{
-						<div class="timeline-Span-Foreground">
+						<div class="timeline-Span-Foreground" style="z-index: @GetForegroundZIndex()">
 							<div>
 								<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
 							</div>
@@ -83,22 +83,23 @@ else
 	<div class="timeline-Span timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
 	     style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px; height: @(DayHeightPixels)px;">
 		@*Background*@
-		<div class="timeline-Span-Background ms-2">
+		<div class="timeline-Span-Background ms-2" style="z-index: @GetBackgroundZIndex()">
 			@Text
 		</div>
 		@*Foreground *@
-		<div class="timeline-Span-Foreground">
+		<div class="timeline-Span-Foreground" style="z-index: @GetForegroundZIndex()">
 			@for (var i = 0; i < Duration; i++)
 			{
-				var dayConditions = GetBlockingConditions(StartDay + i);
-				var conditionDescriptions = GetConditionDescriptions(StartDay + i);
+				var i1 = i;
+
+				var dayConditions = GetBlockingConditions(StartDay + i1);
+				var conditionDescriptions = GetConditionDescriptions(StartDay + i1);
 				double marginRight = 0;
 				if (i != Duration)
 				{
 					marginRight = InnerSpanXMargin() + MarginPixels + BorderSize;
 				}
-
-				var i1 = i;
+				
 				<MudTooltip Placement="Placement.Top">
 					<ChildContent>
 						<div class="timeline-Item dropdown-center"
@@ -134,10 +135,10 @@ else
 									<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
 									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
 								}
-								@if (GetBlockingConditions(StartDay).Any())
+								@if (dayConditions.Any())
 								{
 									<li><hr class="dropdown-divider" /></li>
-									<li><h6 class="dropdown-header">Conditions: @GetConditionDescriptions(StartDay+ i1)</h6></li>
+									<li><h6 class="dropdown-header">Conditions: @conditionDescriptions</h6></li>
 									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
 								}
 								<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
@@ -168,6 +169,8 @@ else
 					</TooltipContent>
 				</MudTooltip>
 			}
+			@*Menus*@
+
 		</div>
 	</div>
 }
@@ -186,11 +189,23 @@ else
 	[Parameter] public bool IsComplete { get; set; } = true;
 	[Parameter] public string? Text { get; set; }
 	[Parameter] public int StartDay { get; set; }
+	[Parameter] public int MaxZIndex { get; set; } = 2;
+	[Parameter] public int ZIndex { get; set; } = 0;
 
 	private static double InnerSpanMargin => 0.1;
 	private static double InnerSpanSize => 0.80;
 	private static double BorderSize => 2;
-	
+
+	private int GetBackgroundZIndex()
+	{
+		return MaxZIndex - ZIndex - 1;
+	}
+
+	private int GetForegroundZIndex()
+	{
+		return MaxZIndex - ZIndex;
+	}
+
 	private double InnerSpanWidth()
 	{
 		return DayWidthPixels * InnerSpanSize;
