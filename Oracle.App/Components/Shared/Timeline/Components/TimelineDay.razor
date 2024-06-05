@@ -6,35 +6,59 @@
 @*Single Day*@
 @if (Duration == 1)
 {
-	<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
-	     style="width: @StyleSpec.GetTimelineDayPixelWidth()px; margin-right: @(StyleSpec.MarginPixels)px;
-	            height: @(StyleSpec.DayHeightPixels)px;">
-		<button class="d-flex align-center justify-center"
-		        type="button"
-		        data-bs-toggle="dropdown"
-		        aria-expanded="false"
-		        style="width: 100%; height: 100%;">
-			<div class="timeline-Span-Background ms-2">
-				<MudIcon Icon="@Icon"></MudIcon>
-			</div>
-
-			@*Blocking Status Exist*@
-			@if (GetBlockingConditions(StartDay).Any())
-			{
-				<div class="timeline-Span-Foreground">
-					<div>
-						<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
+	<OracleTooltip>
+		<ChildContent>
+			<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
+			     style="width: @StyleSpec.GetTimelineDayPixelWidth()px; margin-right: @(StyleSpec.MarginPixels)px;
+			            height: @(StyleSpec.DayHeightPixels)px;">
+				<button class="d-flex align-center justify-center"
+				        type="button"
+				        data-bs-toggle="dropdown"
+				        aria-expanded="false"
+				        style="width: 100%; height: 100%;">
+					<div class="timeline-Span-Background ms-2">
+						<MudIcon Icon="@Icon"></MudIcon>
 					</div>
-				</div>
-			}
-		</button>
-		<TimelineDayMenu DayType="@DayType"
-						 Day="@StartDay"
-		                 Text="@Text" 
-		                 HasConditions="@(GetBlockingConditions(StartDay).Any())" 
-		                 Conditions="@(GetConditionDescriptions(StartDay))"
-		                 OnMenuItemClicked="@((string command) => OnMenuItemClicked.InvokeAsync(command))"/>
-	</div>
+
+					@*Blocking Status Exist*@
+					@if (GetBlockingConditions(StartDay).Any())
+					{
+						<div class="timeline-Span-Foreground">
+							<div>
+								<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
+							</div>
+						</div>
+					}
+				</button>
+				<TimelineDayMenu DayType="@DayType"
+				                 Day="@StartDay"
+				                 Text="@Text" 
+				                 HasConditions="@(GetBlockingConditions(StartDay).Any())" 
+				                 Conditions="@(GetConditionDescriptions(StartDay))"
+				                 OnMenuItemClicked="@((string command) => OnMenuItemClicked.InvokeAsync(command))"/>
+			</div>
+		</ChildContent>
+		<TooltipContent>
+			<div class="d-flex flex-column ma-1">
+				<div>Day @(StartDay)</div>
+
+				@if (DayType != TimelineEntityTypes.None)
+				{
+					<div class="mt-2">@Text</div>
+				}
+
+				@if (GetBlockingConditions(StartDay).Any())
+				{
+					<hr/>
+					<div>
+						@GetConditionDescriptions(StartDay)
+					</div>
+				}
+			</div>
+		</TooltipContent>
+
+	</OracleTooltip>
+	
 }
 @*Multi-Day*@
 else
@@ -103,9 +127,6 @@ else
 								</div>
 							}
 						</div>
-						<div>
-							RenderTime: @elapsedMs ms
-						</div>
 					</TooltipContent>
 				</MudTooltip>
 			}
@@ -129,27 +150,6 @@ else
 	[Parameter] public int StartDay { get; set; }
 
 	private static int BorderPixels => 2;
-
-	private bool HasRendered = false;
-
-	private Stopwatch stopwatch = new Stopwatch();
-	private long elapsedMs;
-
-	protected override void OnParametersSet()
-	{
-		if (!HasRendered)
-			stopwatch.Restart();
-	}
-
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			stopwatch.Stop();
-			elapsedMs = stopwatch.ElapsedMilliseconds;
-			HasRendered = true;
-		}
-	}
 	
 	private List<ConditionVm> GetBlockingConditions(int day)
 	{

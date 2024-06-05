@@ -4,14 +4,27 @@
 
 @if (Note != null)
 {
-	<div class="timeline-note dropdown-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Note.Note);"
-	     title="@($"{Note.Note}-{Day}")">
-		<ul class="dropdown-menu">
-			<li><h6 class="dropdown-header">@Note.Note</h6></li>
-			<li><div class="dropdown-item" @onclick="@(() => OnNoteClicked.InvokeAsync(Note))">Edit</div></li>
-			<li><div class="dropdown-item" @onclick="@(() => OnNoteClicked.InvokeAsync(Note))">End Here</div></li>
-		</ul>
-	</div>
+	<OracleTooltip>
+		<ChildContent>
+			<div class="timeline-note dropdown-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: @(SpanWidth)px; margin-right: @(Margin)px; background: @GetHexColorFromDescription(Note.Note);"
+			     title="@($"{Note.Note}-{Day}")">
+				<ul class="dropdown-menu">
+					<li><h6 class="dropdown-header">@Note.Note</h6></li>
+					<li><div class="dropdown-item" @onclick="@(() => OnNoteClicked.InvokeAsync(Note))">Edit</div></li>
+					<li><div class="dropdown-item" @onclick="@(() => OnNoteClicked.InvokeAsync(Note))">End Here</div></li>
+				</ul>
+			</div>
+		</ChildContent>
+		<TooltipContent>
+			<div class="d-flex flex-column">
+				<div>@Day</div>
+				<hr class="tooltip-hr"/>
+				<div>@Note.Note</div>
+			</div>
+		</TooltipContent>
+	</OracleTooltip>
+
+	
 }
 else
 {

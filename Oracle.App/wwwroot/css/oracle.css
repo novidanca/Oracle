@@ -1,0 +1,40 @@
+﻿.oracle-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+    .oracle-tooltip > span {
+        visibility: hidden;
+        position: absolute;
+        background-color: grey;
+        color: white;
+        text-align: center;
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 1050;
+        width: 120px;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+        margin-bottom: 5px;
+    }
+
+.oracle-tooltip > span::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: grey transparent transparent transparent;
+}
+
+.oracle-tooltip:hover span {
+    visibility: visible;
+}
+
+.oracle-tooltip > span hr {
+    margin: 0.5rem !important;
+}
