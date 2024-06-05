@@ -2,7 +2,7 @@
 @using Oracle.App.Components.Shared.Timeline.Components
 
 
-
+@elapsedMs
 
 <table>
 	<thead>
@@ -11,7 +11,7 @@
 			<th class="timeline-Container" style="position: relative;">
 				@foreach (var day in Enumerable.Range(StartDay, EndDay + 1 - StartDay))
 				{
-					<div class="timeline-Item timeline-Date pa-2" style="width: @GetTimelineDayPixelWidth(TimelineDayWidthPixels, 1, TimelineDayMarginPixels)px; margin-right: @(TimelineDayMarginPixels)px;">
+					<div class="timeline-Item timeline-Date pa-2" style="width: @StyleSpec.GetTimelineDayPixelWidth()px; margin-right: @(StyleSpec.MarginPixels)px;">
 						@day
 					</div>
 				}
@@ -53,12 +53,8 @@
 					                         Duration="@duration"
 					                         Text="@item.Description"
 					                         IsComplete="@item.IsComplete"
-					                         DayWidthPixels="@TimelineDayWidthPixels"
-					                         MarginPixels="@TimelineDayMarginPixels"
-					                         DayHeightPixels="@TimelineDayHeightPixels"
 					                         StartDay="@i1"
-					                         MaxZIndex="Characters.Count"
-					                         ZIndex="c"
+											 StyleSpec="@StyleSpec"
 					                         Conditions="@GetOverlappingConditions(conditions, StartDay, endDay)"
 					                         OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, timelineId: item.TimelineId)" />
 				            }
@@ -66,12 +62,8 @@
 				            {
 					            //Empty Cell Menu
 					            var i1 = i;
-					            <TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
-					                         DayHeightPixels="@TimelineDayHeightPixels"
-					                         MarginPixels="@TimelineDayMarginPixels"
+								<TimelineDay StyleSpec="@StyleSpec"
 					                         StartDay="@i1"
-					                         MaxZIndex="Characters.Count"
-					                         ZIndex="c"
 					                         Conditions="@GetOverlappingConditions(conditions, StartDay, StartDay)"
 					                         OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)" />
 				            }
@@ -91,16 +83,12 @@
 
 					            var item = currentDayItem;
 					            <TimelineDay DayType="@item.Type"
+					                         StyleSpec="@StyleSpec"
 					                         Text="@item.Description"
 					                         IsComplete="@item.IsComplete"
 					                         Duration="@duration"
-					                         DayWidthPixels="@TimelineDayWidthPixels"
-					                         DayHeightPixels="@TimelineDayHeightPixels"
-					                         MarginPixels="@TimelineDayMarginPixels"
 					                         StartDay="@i1"
 					                         Conditions="@conds"
-					                         MaxZIndex="Characters.Count"
-					                         ZIndex="c"
 					                         OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id, item.TimelineId)" />
 				            }
 				            // Check if the current day item has ended. If so, render a blank
@@ -115,12 +103,8 @@
 					            {
 						            //Empty Cell Menu
 						            var i1 = i;
-						            <TimelineDay DayWidthPixels="@TimelineDayWidthPixels"
-						                         DayHeightPixels="@TimelineDayHeightPixels"
-						                         MarginPixels="@TimelineDayMarginPixels"
+									<TimelineDay StyleSpec="@StyleSpec"
 						                         StartDay="@i1"
-						                         MaxZIndex="Characters.Count"
-						                         ZIndex="c"
 						                         Conditions="@GetOverlappingConditions(conditions, i1, i1)"
 						                         OnMenuItemClicked="(command) => OnMenuCommandClicked(command, i1, character.Id)"></TimelineDay>
 					            }
@@ -140,15 +124,15 @@
 							if (note.StartDate <= i && (note.EndDate == null || note.EndDate >= i))
 							{
 								<TimelineNote Note="@note"
-								              DayWidthPixels="@TimelineDayWidthPixels"
-								              MarginPixels="@TimelineDayMarginPixels"
+								              DayWidthPixels="@StyleSpec.DayWidthPixels"
+											  MarginPixels="@StyleSpec.MarginPixels"
 								              Day="@i" />
 							}
 							else
 							{
 								<TimelineNote Note="null"
-								              DayWidthPixels="@TimelineDayWidthPixels"
-								              MarginPixels="@TimelineDayMarginPixels"
+								              DayWidthPixels="@StyleSpec.DayWidthPixels"
+								              MarginPixels="@StyleSpec.MarginPixels"
 								              Day="@i" />
 							}
 						}

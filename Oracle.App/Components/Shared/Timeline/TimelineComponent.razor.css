@@ -4,13 +4,63 @@
     flex-wrap: nowrap;
 }
 
+.timeline-Date {
+    font-size: 10px;
+}
+
+
 .timeline-Item {
     cursor: pointer;
     border: solid 2px transparent;
     border-radius: 5px;
-    height: 40px;
+    position: relative;
 }
 
-.timeline-Date {
-    font-size: 10px;
+.timeline-Item:hover {
+    border-color: black;
+}
+
+.timeline-Item.incomplete {
+    background: repeating-linear-gradient( 45deg, aqua, #06C3F9 10px);
+    font-weight: bold;
+    border: solid 2px #B8BFF4;
+}
+
+.timeline-Item.incomplete:hover {
+    border-color: black;
+}
+
+.timeline-Span-Background {
+    position: absolute;
+    inset: 0;
+}
+
+.timeline-Span-Foreground {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.timeline-Adventure {
+    background-color: aqua;
+    border: solid 2px aqua;
+}
+
+.timeline-Activity {
+    background-color: pink;
+    border: solid 2px pink;
+}
+
+.timeline-Status {
+    background-color: gray;
+    border: solid 2px gray;
+}
+
+.timeline-note {
+    height: 5px;
+    border: 2px solid transparent;
+}
+
+.timeline-note:hover {
+    border-color: black;
 }

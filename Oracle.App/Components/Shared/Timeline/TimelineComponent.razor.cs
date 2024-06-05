@@ -1,8 +1,12 @@
 ﻿#region using
 
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Oracle.App.Components.Shared.Dialogs;
+using Oracle.App.Components.Shared.Timeline.Models;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
 using Oracle.Logic.Services.TimelineService;
@@ -25,10 +29,22 @@ public partial class TimelineComponent
 	[Parameter] [EditorRequired] public int StartDay { get; set; }
 	[Parameter] [EditorRequired] public int EndDay { get; set; }
 	[Parameter] [EditorRequired] public EventCallback OnStateChanged { get; set; }
+	[Parameter] public TimelineDayStyleSpec StyleSpec { get; set; } = new();
 
-	[Parameter] public int TimelineDayWidthPixels { get; set; } = 36;
-	[Parameter] public int TimelineDayHeightPixels { get; set; } = 36;
-	[Parameter] public int TimelineDayMarginPixels { get; set; } = 1;
+	private Stopwatch stopwatch = new();
+	private long elapsedMs;
+
+	protected override void OnParametersSet()
+	{
+		stopwatch.Restart();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		stopwatch.Stop();
+		elapsedMs = stopwatch.ElapsedMilliseconds;
+	}
+
 
 	#region TimelineDisplayHelpers
 
@@ -108,6 +124,24 @@ public partial class TimelineComponent
 				break;
 			case "addNote":
 				await AddNoteButton_Clicked(date, characterId);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private async Task OnNoteMenuClicked(NoteVm note, string commandName, int day = 0)
+	{
+		switch (commandName)
+		{
+			case "editNote":
+				// Add your code here for the "editNote" case
+				break;
+			case "deleteNote":
+				// Add your code here for the "deleteNote" case
+				break;
+			case "endNote":
+				// Add your code here for the "endNote" case
 				break;
 			default:
 				break;
@@ -196,6 +230,60 @@ public partial class TimelineComponent
 		var result = await dialog.Result;
 
 		return !result.Canceled;
+	}
+
+
+	private string GetConditionDescriptions(List<ConditionVm> conditions)
+	{
+		return conditions.Any() ? string.Join(", ", conditions.Select(x => x.Description)) : "";
+	}
+
+	private int GetNoteSpanWidth(NoteVm note, int currentDay)
+	{
+		if (note is { EndDate: not null } && note.EndDate == currentDay) return StyleSpec.DayWidthPixels;
+		return StyleSpec.DayWidthPixels + StyleSpec.MarginPixels;
+	}
+
+	private int GetNoteSpanMargin(NoteVm note, int currentDay)
+	{
+		if (note is { EndDate: not null } && note.EndDate == currentDay) return StyleSpec.MarginPixels;
+		return 0;
+	}
+
+	public static string GetHexColorFromDescription(string description)
+	{
+		// Step 1: Hash the string
+		var hash = GetStableHash(description);
+
+		// Step 2: Convert hash to a hex color
+		var hexColor = HashToColor(hash);
+
+		return hexColor;
+	}
+
+	private static int GetStableHash(string input)
+	{
+		// Use a hash function to generate a stable integer hash from the string
+		using (var md5 = MD5.Create())
+		{
+			var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+			var hash = BitConverter.ToInt32(hashBytes, 0);
+			return hash;
+		}
+	}
+
+	private static string HashToColor(int hash)
+	{
+		// Ensure the hash is positive
+		hash = Math.Abs(hash);
+
+		// Generate RGB values from the hash
+		var r = (hash & 0xFF0000) >> 16;
+		var g = (hash & 0x00FF00) >> 8;
+		var b = hash & 0x0000FF;
+
+		// Convert RGB to hex
+		return $"#{r:X2}{g:X2}{b:X2}";
 	}
 
 	#endregion

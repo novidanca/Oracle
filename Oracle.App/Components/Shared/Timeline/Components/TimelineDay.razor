@@ -1,113 +1,72 @@
-﻿@using Oracle.Logic.Services.TimelineService
+﻿@using System.Diagnostics
+@using Oracle.App.Components.Shared.Timeline.Models
+@using Oracle.Logic.Services.TimelineService
+@using Oracle.App.Components.Shared.Timeline.Components
 
 @*Single Day*@
 @if (Duration == 1)
 {
-	<MudTooltip Placement="Placement.Top">
-		<ChildContent>
-			<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
-				 style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px;
-				 height: @(DayHeightPixels)px;">
-				<button class="d-flex align-center justify-center"
-						type="button"
-						data-bs-toggle="dropdown"
-						aria-expanded="false"
-						style="width: 100%; height: 100%;">
-					<div class="timeline-Span-Background ms-2" style="z-index: @GetBackgroundZIndex()">
-						<MudIcon Icon="@Icon"></MudIcon>
-					</div>
-
-					@*Blocking Status Exist*@
-					@if (GetBlockingConditions(StartDay).Any())
-					{
-						<div class="timeline-Span-Foreground" style="z-index: @GetForegroundZIndex()">
-							<div>
-								<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
-							</div>
-						</div>
-					}
-				</button>
-				<ul class="dropdown-menu">
-					@if (DayType == TimelineEntityTypes.None)
-					{
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
-					}
-					@if (DayType == TimelineEntityTypes.Activity)
-					{
-						<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
-					}
-					@if (DayType == TimelineEntityTypes.Adventure)
-					{
-						<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
-					}
-					@if (GetBlockingConditions(StartDay).Any())
-					{
-						<li><hr class="dropdown-divider" /></li>
-						<li><h6 class="dropdown-header">Conditions: @GetConditionDescriptions(StartDay)</h6></li>
-						<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
-					}
-					<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
-					<li><hr class="dropdown-divider" /></li>
-					<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addNote"))">Add Note</div></li>
-				</ul>
+	<div class="timeline-Span dropdown-center timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
+	     style="width: @StyleSpec.GetTimelineDayPixelWidth()px; margin-right: @(StyleSpec.MarginPixels)px;
+	            height: @(StyleSpec.DayHeightPixels)px;">
+		<button class="d-flex align-center justify-center"
+		        type="button"
+		        data-bs-toggle="dropdown"
+		        aria-expanded="false"
+		        style="width: 100%; height: 100%;">
+			<div class="timeline-Span-Background ms-2">
+				<MudIcon Icon="@Icon"></MudIcon>
 			</div>
-		</ChildContent>
-		<TooltipContent>
-			<div class="d-flex flex-column ma-1">
-				<div>Day @StartDay</div>
 
-				@if (DayType != TimelineEntityTypes.None)
-				{
-					<div class="mt-2">@Text</div>
-				}
-
-				@if (GetBlockingConditions(StartDay).Any())
-				{
-					<hr/>
+			@*Blocking Status Exist*@
+			@if (GetBlockingConditions(StartDay).Any())
+			{
+				<div class="timeline-Span-Foreground">
 					<div>
-						@GetConditionDescriptions(StartDay)
-
+						<MudIcon Icon="@Icons.Material.Filled.Texture" Size="Size.Large"></MudIcon>
 					</div>
-				}
-			</div>
-		</TooltipContent>
-	</MudTooltip>
+				</div>
+			}
+		</button>
+		<TimelineDayMenu DayType="@DayType"
+						 Day="@StartDay"
+		                 Text="@Text" 
+		                 HasConditions="@(GetBlockingConditions(StartDay).Any())" 
+		                 Conditions="@(GetConditionDescriptions(StartDay))"
+		                 OnMenuItemClicked="@((string command) => OnMenuItemClicked.InvokeAsync(command))"/>
+	</div>
 }
 @*Multi-Day*@
 else
 {
 	<div class="timeline-Span timeline-Item @CssClass @(IsComplete ? "" : "incomplete")"
-	     style="width: @GetTimelineDayPixelWidth(DayWidthPixels, Duration, MarginPixels)px; margin-right: @(MarginPixels)px; height: @(DayHeightPixels)px;">
+		 style="width: @StyleSpec.GetTimelineDayPixelWidth(Duration)px; margin-right: @(StyleSpec.MarginPixels)px; height: @(StyleSpec.DayHeightPixels)px;">
 		@*Background*@
-		<div class="timeline-Span-Background ms-2" style="z-index: @GetBackgroundZIndex()">
+		<div class="timeline-Span-Background ms-2">
 			@Text
 		</div>
 		@*Foreground *@
-		<div class="timeline-Span-Foreground" style="z-index: @GetForegroundZIndex()">
+		<div class="timeline-Span-Foreground" style="width: @StyleSpec.GetSpanInnerPixelWidth(Duration)px; height: @(StyleSpec.InnerSpanHeightPixels)px;">
 			@for (var i = 0; i < Duration; i++)
 			{
-				var i1 = i;
+				var day = i;
 
-				var dayConditions = GetBlockingConditions(StartDay + i1);
-				var conditionDescriptions = GetConditionDescriptions(StartDay + i1);
-				double marginRight = 0;
-				if (i != Duration)
-				{
-					marginRight = InnerSpanXMargin() + MarginPixels + BorderSize;
-				}
+				var dayConditions = GetBlockingConditions(StartDay + day);
+				var conditionDescriptions = GetConditionDescriptions(StartDay + day);
+
+				// Inner span width. Smaller for first and last items
+				var width = day == 0 || day == Duration - 1 ? StyleSpec.InnerSpanEndWidthPixels : StyleSpec.DayWidthPixels;
+				var marginLeft = day == 0 ? StyleSpec.MarginPixels : 0;
+				var marginRight = day == Duration - 1 ? 0 : StyleSpec.MarginPixels;
+				var height = StyleSpec.InnerSpanHeightPixels;
 				
 				<MudTooltip Placement="Placement.Top">
 					<ChildContent>
-						<div class="timeline-Item dropdown-center"
-							 style="width: @(InnerSpanWidth())px; height: @(InnerSpanHeight())px; margin-top: @(InnerSpanYMargin())px; margin-bottom: @(InnerSpanYMargin())px; margin-left: @(InnerSpanXMargin())px; margin-right: @(marginRight)px;">
+						<div class="timeline-Item dropdown-center" style="width: @(width)px; height: @(height)px; margin-left: @(marginLeft)px; margin-right: @(marginRight)px;">
 							<button type="button"
-									data-bs-toggle="dropdown"
-									aria-expanded="false"
-									style="width: 100%; height: 100%;">
+							        data-bs-toggle="dropdown"
+							        aria-expanded="false"
+							        style="width: 100%; height: 100%;">
 								@if (dayConditions.Any())
 								{
 									<div class="timeline-Span-Foreground">
@@ -117,54 +76,35 @@ else
 									</div>
 								}
 							</button>
+							
+							<TimelineDayMenu DayType="@DayType"
+											 Day="@(StartDay + day)"
+							                 Text="@Text" 
+							                 HasConditions="@(dayConditions.Any())" 
+							                 Conditions="@conditionDescriptions"
+							                 OnMenuItemClicked="@((string command) => OnMenuItemClicked.InvokeAsync(command))"/>
 
-							<ul class="dropdown-menu">
-								@if (DayType == TimelineEntityTypes.None)
-								{
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
-								}
-								@if (DayType == TimelineEntityTypes.Activity)
-								{
-									<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
-								}
-								@if (DayType == TimelineEntityTypes.Adventure)
-								{
-									<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
-								}
-								@if (dayConditions.Any())
-								{
-									<li><hr class="dropdown-divider" /></li>
-									<li><h6 class="dropdown-header">Conditions: @conditionDescriptions</h6></li>
-									<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
-								}
-								<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
-
-								<li><hr class="dropdown-divider" /></li>
-								<li><div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addNote"))">Add Note</div></li>
-							</ul>
 						</div>
 					</ChildContent>
 					<TooltipContent>
 						<div class="d-flex flex-column ma-1">
-							<div>Day @(StartDay + i1)</div>
+							<div>Day @(StartDay + day)</div>
 
 							@if (DayType != TimelineEntityTypes.None)
 							{
 								<div class="mt-2">@Text</div>
 							}
 
-							@if (GetBlockingConditions(StartDay + i1).Any())
+							@if (dayConditions.Any())
 							{
 								<hr/>
 								<div>
-									@GetConditionDescriptions(StartDay + i1)
-
+									@conditionDescriptions
 								</div>
 							}
+						</div>
+						<div>
+							RenderTime: @elapsedMs ms
 						</div>
 					</TooltipContent>
 				</MudTooltip>
@@ -180,52 +120,37 @@ else
 @code
 {
 	[Parameter] public int Duration { get; set; } = 1;
-	[Parameter] public int DayWidthPixels { get; set; }
-	[Parameter] public int DayHeightPixels { get; set; }
-	[Parameter] public int MarginPixels { get; set; }
+	[Parameter] public TimelineDayStyleSpec StyleSpec { get; set; } = new();
 	[Parameter] public List<ConditionVm> Conditions { get; set; } = [];
 	[Parameter] public TimelineEntityTypes DayType { get; set; } = TimelineEntityTypes.None;
 	[Parameter] public EventCallback<string> OnMenuItemClicked { get; set; }
 	[Parameter] public bool IsComplete { get; set; } = true;
 	[Parameter] public string? Text { get; set; }
 	[Parameter] public int StartDay { get; set; }
-	[Parameter] public int MaxZIndex { get; set; } = 2;
-	[Parameter] public int ZIndex { get; set; } = 0;
 
-	private static double InnerSpanMargin => 0.1;
-	private static double InnerSpanSize => 0.80;
-	private static double BorderSize => 2;
+	private static int BorderPixels => 2;
 
-	private int GetBackgroundZIndex()
+	private bool HasRendered = false;
+
+	private Stopwatch stopwatch = new Stopwatch();
+	private long elapsedMs;
+
+	protected override void OnParametersSet()
 	{
-		return MaxZIndex - ZIndex - 1;
+		if (!HasRendered)
+			stopwatch.Restart();
 	}
 
-	private int GetForegroundZIndex()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		return MaxZIndex - ZIndex;
+		if (firstRender)
+		{
+			stopwatch.Stop();
+			elapsedMs = stopwatch.ElapsedMilliseconds;
+			HasRendered = true;
+		}
 	}
-
-	private double InnerSpanWidth()
-	{
-		return DayWidthPixels * InnerSpanSize;
-	}
-
-	private double InnerSpanHeight()
-	{
-		return DayHeightPixels * InnerSpanSize;
-	}
-
-	private double InnerSpanYMargin()
-	{
-		return (DayHeightPixels * InnerSpanMargin)-(BorderSize/2);
-	}
-
-	private double InnerSpanXMargin()
-	{
-		return (DayWidthPixels * InnerSpanMargin) - (BorderSize / 2);
-	}
-
+	
 	private List<ConditionVm> GetBlockingConditions(int day)
 	{
 		return Conditions.Where(x => x.StartDate <= day && (x.EndDate == null || x.EndDate >= day)).ToList();
@@ -257,11 +182,4 @@ else
 	    _ => ""
     };
 
-    private static int GetTimelineDayPixelWidth(int timelineDayPixels, int numDays, int timelineDayMarginPixels)
-    {
-	    var numMarginPixels = numDays <= 1 ? 0 : timelineDayMarginPixels * (numDays - 1);
-	    var numPixels = timelineDayPixels * numDays;
-	    numPixels += numMarginPixels;
-	    return numPixels;
-    }
 }
