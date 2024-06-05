@@ -1,0 +1,52 @@
+﻿@using Oracle.Logic.Services.TimelineService
+
+
+<ul class="dropdown-menu">	  
+	<li><h6 class="dropdown-header">Day @Day</h6></li>
+	<li><hr class="dropdown-divider" /></li>
+	@if (DayType == TimelineEntityTypes.None)
+	{
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addActivity"))">Add Activity</div></li>
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addAdventure"))">Add Adventure</div></li>
+	}
+	@if (DayType == TimelineEntityTypes.Activity)
+	{
+		<li><h6 class="dropdown-header">Downtime Activity: @Text</h6></li>
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("editActivity"))">Edit</div></li>
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("deleteActivity"))">Delete</div></li>
+	}
+	@if (DayType == TimelineEntityTypes.Adventure)
+	{
+		<li><h6 class="dropdown-header">Adventure: @Text</h6></li>
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("viewAdventure"))">View</div></li>
+	}
+	@if (HasConditions)
+	{
+		<li><hr class="dropdown-divider"/></li>
+		<li><h6 class="dropdown-header">Conditions: @Conditions</h6></li>
+		<li>
+			<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("manageConditions"))">Manage Conditions</div></li>
+	}
+	<li>
+		<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addCondition"))">Add Condition</div></li>
+	<li><hr class="dropdown-divider"/></li>
+	<li>
+		<div class="dropdown-item" @onclick="@(() => OnMenuItemClicked.InvokeAsync("addNote"))">Add Note</div></li>
+</ul>
+
+		
+@code{
+	[Parameter] public EventCallback<string> OnMenuItemClicked { get; set; }
+	[Parameter] public TimelineEntityTypes DayType { get; set; }
+	[Parameter] public string Text { get; set; } = "";
+	[Parameter] public bool HasConditions { get; set; }
+	[Parameter] public string Conditions { get; set; } = "";
+	[Parameter] public int Day { get; set; }
+
+	protected override bool ShouldRender() => false;
+}
