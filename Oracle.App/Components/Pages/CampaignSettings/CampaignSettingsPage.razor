@@ -1,0 +1,77 @@
+﻿@page "/campaignSettings"
+@using Oracle.Data.Models
+@inherits OracleBasePage
+
+<OracleTitle Title="Campaign Settings"/>
+
+<div class="d-flex">
+    <h3 class="me-auto">Players</h3>
+    <button class="btn btn-primary float-right">Add Player</button>
+</div>
+
+<MudDataGrid Items="@Players">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" />
+        <TemplateColumn Title="Character Count">
+            <CellTemplate>
+                @{
+                    var player = context.Item;
+                    foreach (var character in player.Characters)
+                    {
+                        <span>@character.Name</span>
+                    }
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+<hr/>
+
+<div class="d-flex">
+    <h3 class="me-auto">Activity Types</h3>
+    <button class="btn btn-primary float-right">Add Activity Type</button>
+</div>
+
+<MudDataGrid Items="@ActivityTypes">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" />
+        <TemplateColumn Title="Project Contribution Type">
+            <CellTemplate>
+                @{
+                    var activityType = (ActivityType)context.Item;
+                    @if (activityType.ProjectContributionType != null)
+                    {
+                        <span>@activityType.ProjectContributionType.Name</span>
+                    }
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Contribution per day">
+            <CellTemplate>
+                @{
+                    var activityType = (ActivityType)context.Item;
+                    @if (activityType.ProjectContributionType != null)
+                    {
+                        <span>@activityType.ProjectContributionAmount</span>
+                    }
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+<hr/>
+
+<div class="d-flex">
+    <h3 class="me-auto">Project Contribution Types</h3>
+    <button class="btn btn-primary float-right">Add Project Contribution Type</button>
+</div>
+
+<MudDataGrid Items="@ProjectContributionTypes">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" />
+    </Columns>
+</MudDataGrid>
+
+<hr/>

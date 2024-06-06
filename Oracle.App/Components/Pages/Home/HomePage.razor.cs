@@ -10,34 +10,6 @@ namespace Oracle.App.Components.Pages.Home;
 
 public partial class HomePage : OracleBasePage
 {
-	[Inject] private CampaignSettingsService SettingsService { get; set; } = null!;
-
-	private CampaignSettings CampaignSettings;
-
-	#region Init
-
-	protected override async Task OnInitializedAsync()
-	{
-		await GetSettings();
-		UpdateLayout();
-
-		await Refresh();
-	}
-
-	private async Task GetSettings()
-	{
-		CampaignSettings = await SettingsService.GetCampaignSettings();
-	}
-
-	private void UpdateLayout()
-	{
-		if (Layout == null) return;
-		Layout.AppTitle = CampaignSettings.CampaignName;
-		Layout.EnableDrawer();
-	}
-
-	#endregion
-
 	protected override async Task Refresh()
 	{
 	}

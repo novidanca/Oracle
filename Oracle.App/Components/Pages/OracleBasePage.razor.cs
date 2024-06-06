@@ -5,6 +5,7 @@ using MudBlazor;
 using Oracle.App.Components.Layout;
 using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data;
+using Oracle.Logic.Services.CampaignSettings;
 using Color = MudBlazor.Color;
 
 #endregion
@@ -18,11 +19,29 @@ public partial class OracleBasePage : ComponentBase
 	[Inject] protected IDialogService DialogService { get; set; }
 	[Inject] protected ISnackbar Snackbar { get; set; }
 	[Inject] protected NavigationManager NavManager { get; set; }
+	[Inject] private CampaignSettingsService SettingsService { get; set; } = null!;
+
+	protected Data.Models.CampaignSettings CampaignSettings { get; set; } = new();
 
 	protected override async Task OnInitializedAsync()
 	{
+		await GetSettings();
+		UpdateLayout();
+
 		await Refresh();
 		StateHasChanged();
+	}
+	private void UpdateLayout()
+	{
+		if (Layout == null) return;
+		Layout.AppTitle = CampaignSettings.CampaignName;
+		Layout.EnableDrawer();
+	}
+
+	
+	private async Task GetSettings()
+	{
+		CampaignSettings = await SettingsService.GetCampaignSettings();
 	}
 
 	protected virtual async Task Refresh()
