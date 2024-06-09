@@ -161,7 +161,7 @@ public partial class TimelineComponent
 			{ "Date", date }
 		};
 
-		var dialog = await DialogService.ShowAsync<NewActivityDialog>("Add new activity", parameters);
+		var dialog = await DialogService.ShowAsync<Timeline_AddActivityDialog>("Add new activity", parameters);
 		var result = await dialog.Result;
 
 		if (!result.Canceled)
@@ -200,7 +200,7 @@ public partial class TimelineComponent
 			{ "EndDate", date + 7 }
 		};
 
-		var dialog = await DialogService.ShowAsync<NewTimelineNoteDialog>("Add new note", parameters);
+		var dialog = await DialogService.ShowAsync<Timeline_AddNoteDialog>("Add new note", parameters);
 		var result = await dialog.Result;
 
 		if (!result.Canceled)

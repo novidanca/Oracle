@@ -9,7 +9,7 @@
     </TitleContent>
     <DialogContent>
 	    <div class="row">
-		    <div class="col-6">
+		    <div class="col-4">
 			    <MudSelect T="int" Label="Activity Type" Variant="Variant.Outlined" ValueChanged="OnActivityTypeSelected">
 				    @foreach (var activityType in ActivityTypes)
 				    {
@@ -30,8 +30,10 @@
 				    <MudButton OnClick="AddProject">Add</MudButton>
 			    </div>
 		    </div>
-		    <div class="col-6">
-				@SelectedActivityType?.Description
+		    <div class="col-8">
+			    <div style="overflow-y: scroll;">
+					@((MarkupString)(SelectedActivityType?.Description ?? "<div>There is no description for this Activity Type</div>"))
+			    </div>
 		    </div>
 	    </div>
 	    
@@ -68,6 +70,11 @@
     
     protected override async Task OnInitializedAsync()
     {
+		MudDialog.Options.FullWidth = true;
+		MudDialog.Options.MaxWidth = MaxWidth.ExtraLarge;
+
+		MudDialog.SetOptions(MudDialog.Options);
+
 	    await Refresh();
     }
 

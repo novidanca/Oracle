@@ -152,7 +152,7 @@ public partial class TimelinePage : OracleBasePage
 			{ "Date", date }
 		};
 
-		var dialog = await DialogService.ShowAsync<NewActivityDialog>("Add new activity", parameters);
+		var dialog = await DialogService.ShowAsync<Timeline_AddActivityDialog>("Add new activity", parameters);
 		var result = await dialog.Result;
 
 		if (!result.Canceled)

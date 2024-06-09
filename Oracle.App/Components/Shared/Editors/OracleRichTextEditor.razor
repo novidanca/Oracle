@@ -4,7 +4,18 @@
 
 @code {
 	[Parameter]
-	public string Value { get; set; }
+	public string Value
+	{
+		get => _value;
+		set
+		{
+			if (_value == value) return;
+
+			_value = value;
+			ValueChanged.InvokeAsync(value);
+		} }
+
+	private string _value;
 
 	[Parameter]
 	public EventCallback<string> ValueChanged { get; set; }
@@ -21,7 +32,7 @@
 			{ "plugins", "table" },
 			{ "branding", false },
 			{ "menubar", false },
-			{ "toolbar", "table tabledelete | tableprops tablerowprops tablecellprops | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol" }
+			{ "toolbar", "bold italic underline | fontfamily fontsize blocks | forecolor backcolor | blockquote table " }
 		};
 	}
     
