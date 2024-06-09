@@ -29,10 +29,13 @@ namespace Oracle.Data.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Date")
+                    b.Property<int>("EndDate")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StartDate")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -51,6 +54,10 @@ namespace Oracle.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -197,16 +204,10 @@ namespace Oracle.Data.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CharacterStatusId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("EndDay")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("StartDay")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("StatusId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -216,8 +217,6 @@ namespace Oracle.Data.Migrations
                     b.HasIndex("AdventureId");
 
                     b.HasIndex("CharacterId");
-
-                    b.HasIndex("StatusId");
 
                     b.ToTable("CharacterTimelines");
                 });
@@ -401,17 +400,11 @@ namespace Oracle.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Oracle.Data.Models.CharacterCondition", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId");
-
                     b.Navigation("Activity");
 
                     b.Navigation("Adventure");
 
                     b.Navigation("Character");
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Oracle.Data.Models.Project", b =>

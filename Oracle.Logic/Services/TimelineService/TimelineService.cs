@@ -208,7 +208,7 @@ public class TimelineService(
 
 	public async Task<IOutcome> AddToCharacterTimeline(Activity activity, int characterId)
 	{
-		var characterAvailable = await IsCharacterAvailable(characterId, activity.Date);
+		var characterAvailable = await IsCharacterAvailable(characterId, activity.StartDate);
 
 		if (characterAvailable.Failure)
 			return characterAvailable;

@@ -30,7 +30,11 @@
 
 <div class="d-flex">
     <h3 class="me-auto">Activity Types</h3>
-    <button class="btn btn-primary float-right">Add Activity Type</button>
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Outlined"
+               OnClick="NewActivityTypeButton_Clicked">
+	    Add Activity Type
+    </MudButton>
 </div>
 
 <MudDataGrid Items="@ActivityTypes">
@@ -48,14 +52,26 @@
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn Title="Contribution per day">
-            <CellTemplate>
+	        <CellTemplate>
+		        @{
+			        var activityType = (ActivityType)context.Item;
+			        @if (activityType.ProjectContributionType != null)
+			        {
+				        <span>@activityType.ProjectContributionAmount</span>
+			        }
+		        }
+	        </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="">
+	        <CellTemplate>
                 @{
-                    var activityType = (ActivityType)context.Item;
-                    @if (activityType.ProjectContributionType != null)
-                    {
-                        <span>@activityType.ProjectContributionAmount</span>
-                    }
-                }
+					var activityType = (ActivityType)context.Item;
+					<MudButton Color="Color.Primary"
+							   Variant="Variant.Outlined"
+							   OnClick="@(() => EditActivityTypeButton_Clicked(activityType.Id))">
+						Edit
+					</MudButton>
+                }		        
             </CellTemplate>
         </TemplateColumn>
     </Columns>

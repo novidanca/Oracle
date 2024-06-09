@@ -16,7 +16,8 @@ public class Activity
 	[Required] public int CharacterId { get; set; }
 	public Character Character { get; set; }
 
-	[Required] public int Date { get; set; }
+	[Required] public int StartDate { get; set; }
+	[Required] public int EndDate { get; set; }
 
 	public int? ProjectId { get; set; }
 	public Project? Project { get; set; }

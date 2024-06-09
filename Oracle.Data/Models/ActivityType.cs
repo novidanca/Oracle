@@ -10,6 +10,7 @@ public class ActivityType
 {
 	[Key] public int Id { get; set; }
 	[Required] public string Name { get; set; }
+	[Required] public string Description { get; set; } = "";
 
 	public int? ProjectContributionTypeId { get; set; }
 	public ProjectContributionType? ProjectContributionType { get; set; }

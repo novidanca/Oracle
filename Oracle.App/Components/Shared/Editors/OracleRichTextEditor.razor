@@ -1,0 +1,33 @@
+﻿@using TinyMCE.Blazor
+
+<Editor @bind-Value="Value" Conf="EditorConf" ScriptSrc="js/tinymce/tinymce.min.js" />
+
+@code {
+	[Parameter]
+	public string Value { get; set; }
+
+	[Parameter]
+	public EventCallback<string> ValueChanged { get; set; }
+
+	private Dictionary<string, object> EditorConf;
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		EditorConf = new Dictionary<string, object>
+		{
+			{ "license_key", "gpl" },
+			{ "plugins", "table" },
+			{ "branding", false },
+			{ "menubar", false },
+			{ "toolbar", "table tabledelete | tableprops tablerowprops tablecellprops | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol" }
+		};
+	}
+    
+	private void OnValueChange(string newValue)
+	{
+		Value = newValue;
+		ValueChanged.InvokeAsync(newValue);
+	}
+}

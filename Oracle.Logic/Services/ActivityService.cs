@@ -14,10 +14,11 @@ public class ActivityService(
 	TimelineService.TimelineService timelineService,
 	ProjectService projectService) : ServiceBase(db)
 {
-	public async Task<IOutcome> TryAddActivity(int characterId, int activityTypeId, int date, int? projectId)
+	public async Task<IOutcome> TryAddActivity(int characterId, int activityTypeId, int startDate, int endDate,
+		int? projectId)
 	{
 		// Check if the character is available on the given date
-		var isAvailable = await timelineService.IsCharacterAvailable(characterId, date);
+		var isAvailable = await timelineService.IsCharacterAvailable(characterId, startDate, endDate);
 
 		if (isAvailable.Failure) return Outcomes.Failure().WithMessage("Character is not available on the given date.");
 
@@ -26,7 +27,8 @@ public class ActivityService(
 		{
 			CharacterId = characterId,
 			ActivityTypeId = activityTypeId,
-			Date = date,
+			StartDate = startDate,
+			EndDate = endDate,
 			ProjectId = projectId
 		};
 

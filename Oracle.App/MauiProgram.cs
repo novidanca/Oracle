@@ -47,6 +47,7 @@ public static class MauiProgram
 			config.SnackbarConfiguration.VisibleStateDuration = 5000;
 			config.SnackbarConfiguration.ShowCloseIcon = true;
 		});
+
 		builder.Services.AddAutoRegisteredServices();
 
 #if DEBUG

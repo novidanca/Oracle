@@ -52,8 +52,8 @@ public class TimelineAddService(OracleDbContext db) : ServiceBase(db)
 		{
 			ActivityId = activity.Id,
 			CharacterId = characterId,
-			StartDay = activity.Date,
-			EndDay = activity.Date
+			StartDay = activity.StartDate,
+			EndDay = activity.EndDate
 		};
 
 		Db.CharacterTimelines.Add(timeline);

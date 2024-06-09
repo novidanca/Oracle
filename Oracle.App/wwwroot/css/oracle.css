@@ -38,3 +38,8 @@
 .oracle-tooltip > span hr {
     margin: 0.5rem !important;
 }
+
+
+.tox.tox-silver-sink.tox-tinymce-aux {
+    z-index: 2000;
+}

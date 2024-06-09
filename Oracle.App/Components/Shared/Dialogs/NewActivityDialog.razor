@@ -8,23 +8,33 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudSelect T="int" Label="Activity Type" Variant="Variant.Outlined" ValueChanged="OnActivityTypeSelected">
-            @foreach (var activityType in ActivityTypes)
-            {
-                <MudSelectItem Value="@activityType.Id">@activityType.Name</MudSelectItem>
-            }
-        </MudSelect>
-	    <div class="d-flex align-center">
-		    <MudSelect Disabled="ProjectSelectDisabled" Label="Project" Variant="Variant.Outlined" @bind-Value="SelectedProject">
-			    <MudSelectItem Value="0">Does not contribute to project</MudSelectItem>
-			    @foreach (var project in Projects)
-			    {
-				    <MudSelectItem Value="@project.Id">@project.Name</MudSelectItem>
-			    }
-		    </MudSelect>
-            <MudButton OnClick="AddProject">Add</MudButton>
+	    <div class="row">
+		    <div class="col-6">
+			    <MudSelect T="int" Label="Activity Type" Variant="Variant.Outlined" ValueChanged="OnActivityTypeSelected">
+				    @foreach (var activityType in ActivityTypes)
+				    {
+					    <MudSelectItem Value="@activityType.Id">@activityType.Name</MudSelectItem>
+				    }
+			    </MudSelect>
+			    <MudField Label="Duration" Variant="Variant.Outlined">
+				    <MudNumericField T="int" @bind-Value="Duration"/>
+			    </MudField>
+			    <div class="d-flex align-center">
+				    <MudSelect Disabled="ProjectSelectDisabled" Label="Project" Variant="Variant.Outlined" @bind-Value="SelectedProject">
+					    <MudSelectItem Value="0">Does not contribute to project</MudSelectItem>
+					    @foreach (var project in Projects)
+					    {
+						    <MudSelectItem Value="@project.Id">@project.Name</MudSelectItem>
+					    }
+				    </MudSelect>
+				    <MudButton OnClick="AddProject">Add</MudButton>
+			    </div>
+		    </div>
+		    <div class="col-6">
+				@SelectedActivityType?.Description
+		    </div>
 	    </div>
-        
+	    
     </DialogContent>
     <DialogActions>
         <MudButton Disabled="ProcessingNewActivity" OnClick="Cancel">Cancel</MudButton>
@@ -45,9 +55,13 @@
 	private bool ProcessingNewActivity { get; set; } = false;
 
 	// Activity Fields
-	private int SelectedActivityType { get; set; }
+	private int SelectedActivityTypeId { get; set; }
 	private int SelectedProject { get; set; }
 	private bool ProjectSelectDisabled { get; set; } = true;
+	private int Duration { get; set; } = 1;
+
+    private int EndDate => Math.Max(Date, Date + Duration - 1);
+	private ActivityType? SelectedActivityType => ActivityTypes.FirstOrDefault(x => x.Id == SelectedActivityTypeId);
     
     private List<ActivityType> ActivityTypes { get; set; } = new List<ActivityType>();
     private List<Project> Projects { get; set; } = new List<Project>();
@@ -68,9 +82,9 @@
 
     private async Task OnActivityTypeSelected(int value)
     {
-	    SelectedActivityType = value;
+	    SelectedActivityTypeId = value;
 
-	    var activity = ActivityTypes.FirstOrDefault(x => x.Id == SelectedActivityType);
+	    var activity = ActivityTypes.FirstOrDefault(x => x.Id == SelectedActivityTypeId);
 
 	    if (activity == null)
 	    {
@@ -104,7 +118,7 @@
         ProcessingNewActivity = true;
         
         // Try adding the new activity
-        var outcome = await ActivityService.TryAddActivity(CharacterId, SelectedActivityType, Date, SelectedProject == 0 ? null : SelectedProject);
+        var outcome = await ActivityService.TryAddActivity(CharacterId, SelectedActivityTypeId, Date, EndDate, SelectedProject == 0 ? null : SelectedProject);
         
         if (outcome.Success)
         {

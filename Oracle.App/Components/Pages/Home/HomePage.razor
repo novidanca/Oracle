@@ -1,5 +1,8 @@
-﻿@page "/home"
+﻿@using TinyMCE.Blazor
+
+@page "/home"
 @inherits OracleBasePage
+
 
 <OracleTitle Title="Home" />
 
@@ -7,6 +10,7 @@
 	<p>I haven't put anything here yet</p>
 </div>
 
+<Editor Conf="@EditorConf" ScriptSrc="js/tinymce/tinymce.min.js" />
 
 <MudTextField @bind-Value="Search"/>
 
@@ -16,5 +20,13 @@
 @code{
 	private string Search { get; set; } = "";
 
-
+	//Editor config
+	private Dictionary<string, object> EditorConf = new Dictionary<string, object>()
+	{
+		{ "license_key", "gpl" },
+		{ "plugins", "table" },
+		{ "branding" , false },
+		{ "menubar", false },
+		{ "toolbar", "table tabledelete | tableprops tablerowprops tablecellprops | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol" }
+	};
 }
