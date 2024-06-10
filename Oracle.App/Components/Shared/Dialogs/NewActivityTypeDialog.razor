@@ -12,19 +12,21 @@
     </TitleContent>
     <DialogContent>
         <div class="row">
-	        <div class="col-4">
-		        <MudTextField @bind-Value="ActivityTypeName" />
-		        <MudCheckBox Label="Contributes to a project?" @bind-Value="ActivityContributesToProject"/>
+	        <div class="col-md-4">
+		        <h6>Details</h6>
+		        <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="ActivityTypeName"/>
+		        <MudCheckBox Label="Can contributes to a project?" @bind-Value="ActivityContributesToProject"/>
 		        <MudSelect T="int" Disabled="@(!ActivityContributesToProject)" Label="Project Contribution Type" Variant="Variant.Outlined" @bind-Value="SelectedProjectContributionType">
 			        @foreach (var projectContributionType in ProjectContributionTypes)
 			        {
 				        <MudSelectItem Value="@projectContributionType.Id">@projectContributionType.Name</MudSelectItem>
 			        }
 		        </MudSelect>
-		        <MudNumericField Disabled="@(!ActivityContributesToProject)" Label="Contribution per day" @bind-Value="ActivityContributionPerDay"/>
+		        <MudNumericField Variant="Variant.Outlined" Disabled="@(!ActivityContributesToProject)" Label="Contribution per day" @bind-Value="ActivityContributionPerDay"/>
 	        </div>
-	        <div class="col-8">
-
+	        <div class="col-md-8">
+                
+		        <h6>Description</h6>
 		        <OracleRichTextEditor @bind-Value="ActivityTypeDescription"/>
 
 	        </div>
@@ -58,7 +60,7 @@
     protected override async Task OnInitializedAsync()
     {
 	    MudDialog.Options.FullWidth = true;
-        MudDialog.Options.MaxWidth = MaxWidth.ExtraLarge;
+        MudDialog.Options.MaxWidth = MaxWidth.Large;
 
         MudDialog.SetOptions(MudDialog.Options);
 
