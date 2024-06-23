@@ -6,7 +6,11 @@
 
 <div class="d-flex">
     <h3 class="me-auto">Players</h3>
-    <button class="btn btn-primary float-right">Add Player</button>
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Outlined"
+               OnClick="NewPlayerButton_Clicked">
+        Add Player
+    </MudButton>
 </div>
 
 <MudDataGrid Items="@Players">

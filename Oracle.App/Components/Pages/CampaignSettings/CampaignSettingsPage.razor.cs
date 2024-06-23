@@ -19,13 +19,14 @@ public partial class CampaignSettingsPage : OracleBasePage
     public List<ActivityType> ActivityTypes { get; set; } = new();
     public List<ProjectContributionType> ProjectContributionTypes { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task Refresh()
     {
         Players = await Db.Players.ToListAsync();
         ActivityTypes = await ActivityService.GetActivityTypes();
         ProjectContributionTypes = await Db.ProjectContributionTypes.ToListAsync();
     }
 
+    #region UI Events
 
     private async Task NewActivityTypeButton_Clicked()
     {
@@ -57,4 +58,19 @@ public partial class CampaignSettingsPage : OracleBasePage
             Snackbar.Add($"{newName} updated!", Severity.Success);
         }
     }
+
+    private async Task NewPlayerButton_Clicked()
+    {
+        var dialog = await DialogService.ShowAsync<NewPlayerDialog>("Add new player");
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var newName = result.Data.ToString();
+            await Refresh();
+            Snackbar.Add($"{newName} created!", Severity.Success);
+        }
+    }
+
+    #endregion
 }

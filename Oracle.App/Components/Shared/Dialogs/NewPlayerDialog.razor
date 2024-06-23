@@ -1,0 +1,97 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Oracle.Data
+@using Oracle.Data.Models
+@using Oracle.Logic.Services
+@using Oracle.App.Components.Shared.Editors
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @((PlayerId == 0) ? "Add new player" : "Edit player")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="row">
+         <div class="col-md-12">
+          <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="PlayerName"/>
+         </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="ProcessingNewPlayer" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="ProcessingNewPlayer" Color="Color.Primary" OnClick="Submit">@(PlayerId == 0 ? "Add Player" : "Update")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Inject] protected IDialogService DialogService { get; set; } = null!;
+    [Inject] private OracleDbContext Db { get; set; } = null!;
+
+    [Parameter] public int PlayerId { get; set; }
+
+    
+    private bool ProcessingNewPlayer { get; set; } = false;
+
+    private string PlayerName { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+     MudDialog.Options.FullWidth = true;
+        MudDialog.Options.MaxWidth = MaxWidth.Medium;
+
+        MudDialog.SetOptions(MudDialog.Options);
+
+        await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        if (PlayerId != 0)
+        {
+            var player = await Db.Players.FindAsync(PlayerId);
+            if (player != null)
+            {
+                PlayerName = player.Name;
+            }
+        }
+    }
+
+    private async Task Submit()
+    {
+        ProcessingNewPlayer = true;
+
+        if (PlayerId == 0)
+        {
+            // Add new player
+            var player = new Player
+			{
+				Name = PlayerName
+			};
+
+            Db.Players.Add(player);
+            await Db.SaveChangesAsync();
+            
+            MudDialog.Close(DialogResult.Ok("Player Added"));
+            
+        }
+        else
+        {
+         var player = await Db.Players.FindAsync(PlayerId);
+         if (player != null)
+         {
+                player.Name = PlayerName;
+
+                await Db.SaveChangesAsync();
+          MudDialog.Close(DialogResult.Ok("Player Updated"));
+         }
+         else
+         {
+          MudDialog.Cancel();
+         }
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
