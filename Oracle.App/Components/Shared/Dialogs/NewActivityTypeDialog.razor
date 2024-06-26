@@ -15,7 +15,7 @@
 	        <div class="col-md-4">
 		        <h6>Details</h6>
 		        <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="ActivityTypeName"/>
-		        <MudCheckBox Label="Can contributes to a project?" @bind-Value="ActivityContributesToProject"/>
+		        <MudCheckBox Label="Can contribute to a project?" @bind-Value="ActivityContributesToProject"/>
 		        <MudSelect T="int" Disabled="@(!ActivityContributesToProject)" Label="Project Contribution Type" Variant="Variant.Outlined" @bind-Value="SelectedProjectContributionType">
 			        @foreach (var projectContributionType in ProjectContributionTypes)
 			        {
