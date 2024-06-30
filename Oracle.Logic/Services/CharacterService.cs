@@ -20,14 +20,14 @@ public class CharacterService(OracleDbContext db) : ServiceBase(db)
 			return await character.FirstAsync();
 
 		if (loadOptions.GetPlayer)
-			character.Include(x => x.Player);
+			character = character.Include(x => x.Player);
 		if (loadOptions.GetActivities)
-			character.Include(x => x.Activities);
+			character = character.Include(x => x.Activities);
 		if (loadOptions.GetAdventures)
-			character.Include(x => x.AdventureCharacters)
+			character = character.Include(x => x.AdventureCharacters)
 				.ThenInclude(x => x.Adventure);
 		if (loadOptions.GetProjects)
-			character.Include(x => x.Projects);
+			character = character.Include(x => x.Projects);
 
 		return await character.AsSplitQuery().FirstAsync();
 	}
@@ -40,14 +40,14 @@ public class CharacterService(OracleDbContext db) : ServiceBase(db)
 			return await characters.ToListAsync();
 
 		if (loadOptions.GetPlayer)
-			characters.Include(x => x.Player);
+			characters = characters.Include(x => x.Player);
 		if (loadOptions.GetActivities)
-			characters.Include(x => x.Activities);
+			characters = characters.Include(x => x.Activities);
 		if (loadOptions.GetAdventures)
-			characters.Include(x => x.AdventureCharacters)
+			characters = characters.Include(x => x.AdventureCharacters)
 				.ThenInclude(x => x.Adventure);
 		if (loadOptions.GetProjects)
-			characters.Include(x => x.Projects);
+			characters = characters.Include(x => x.Projects);
 
 		return await characters.AsSplitQuery().ToListAsync();
 	}

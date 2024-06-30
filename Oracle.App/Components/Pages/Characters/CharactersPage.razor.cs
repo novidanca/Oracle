@@ -18,7 +18,7 @@ public partial class CharactersPage : OracleBasePage
 
 	protected override async Task Refresh()
 	{
-		AllCharacters = await CharacterService.GetAllCharacters();
+		AllCharacters = await CharacterService.GetAllCharacters(new CharacterLoadOptions(true));
 	}
 
 	private async Task NewCharacterButton_Clicked()
