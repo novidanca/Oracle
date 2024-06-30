@@ -6,6 +6,7 @@ using MudBlazor;
 using Oracle.App.Components.Shared.Dialogs;
 using Oracle.Data.Models;
 using Oracle.Logic.Services;
+using Color = MudBlazor.Color;
 
 #endregion
 
@@ -43,6 +44,12 @@ public partial class CharactersPage : OracleBasePage
 	private async Task OnCharacterDeleteButton_Clicked(Character character)
 	{
 		var name = character.Name;
+
+		var confirm = await Confirm("Delete Character", $"Really delete {name}? This cannot be undone", "Delete",
+			Color.Error);
+
+		if (!confirm) return;
+
 		await CharacterService.DeleteCharacter(character);
 		await Refresh();
 		Snackbar.Add($"{name} was deleted", Severity.Info);

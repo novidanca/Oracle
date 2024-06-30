@@ -173,10 +173,6 @@ public class AdventureService(OracleDbContext db, TimelineService.TimelineServic
 		if (character == null)
 			return Outcomes.Failure<Adventure>().WithMessage($"Character {characterId} does not exist");
 
-		if (adventure.IsComplete)
-			return Outcomes.Failure<Adventure>().WithMessage("Adventure is already complete");
-
-
 		// We're just adding the character to a potential adventure, so we don't need to check if the adventure is started
 		if (!adventure.IsStarted)
 		{

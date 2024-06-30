@@ -21,7 +21,7 @@ public partial class TimelinePage : OracleBasePage
 	public static int TimelineDayWidthPixels = 40;
 	public static int TimelineDayMarginPixels = 3;
 
-	public int StartDay { get; set; } = 0;
+	public int StartDay { get; set; } = 1;
 	public int EndDay => StartDay + 19;
 	public int MaxEndDay { get; set; } = 365;
 

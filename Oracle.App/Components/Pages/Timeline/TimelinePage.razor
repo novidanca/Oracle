@@ -9,7 +9,7 @@
 
 <MudPaper Class="pa-5">
 	<div class="mb-4">
-		<MudSlider T="int" ValueChanged="OnStartDateChanged" Min="0" Max="@MaxEndDay" ValueLabel="true"></MudSlider>
+		<MudSlider T="int" ValueChanged="OnStartDateChanged" Min="1" Max="@MaxEndDay" ValueLabel="true"></MudSlider>
 	</div>
 	<TimelineComponent StartDay="@StartDay" OnStateChanged="Refresh" EndDay="@EndDay" Characters="@Characters" CharacterTimelines="@Timeline"/>
 </MudPaper>
